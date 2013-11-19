@@ -21,11 +21,15 @@ int main(int argc, char *argv[]) {
 	while ((opts = getopt(argc, argv, ":h:p:n:a:")) != -1) {
 		switch (opts) {
 			case 'h': 
-				printf("Flag -h, with parameter %s\n",optarg);
+
+              allocate(portno,40);
+              portno[3] = 23;
+              printf("Flag -h, with parameter %s\n",portno[3]);
 				break;
 			case 'p':
               allocate(portno,40);
-              portno[3] = 48;
+              portno[3] = 23;
+              
               
               printf("Flag -p, with paremeter %d\n", portno[3]);
 				break;
