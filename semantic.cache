@@ -1,0 +1,15 @@
+;; Object proy1-ci4835/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "proy1-ci4835/"
+  :tables (list 
+   (semanticdb-table "client.c"
+    :major-mode 'c-mode
+    :tags '(("stdio.h" include (:system-flag t) nil [1 19]) ("stdlib.h" include (:system-flag t) nil [20 39]) ("unistd.h" include (:system-flag t) nil [40 59]) ("string.h" include (:system-flag t) nil [60 79]) ("errno.h" include (:system-flag t) nil [80 98]) ("sys/types.h" include (:system-flag t) nil [99 121]) ("sys/socket.h" include (:system-flag t) nil [122 145]) ("netinet/in.h" include (:system-flag t) nil [146 169]) ("netdb.h" include (:system-flag t) nil [170 188]) ("error" function (:arguments (("msg" variable (:pointer 1 :type "char") (reparse-symbol arg-sub-list) [204 214])) :type "void") nil [193 242]) ("allocate" function (:arguments (("x" variable (:pointer 1 :type "void") (reparse-symbol arg-sub-list) [258 266]) ("size" variable (:type "int") (reparse-symbol arg-sub-list) [267 276])) :type "void") nil [244 361]) ("main" function (:arguments (("argc" variable (:type "int") (reparse-symbol arg-sub-list) [373 382]) ("argv" variable (:pointer 1 :dereference 1 :type "char") (reparse-symbol arg-sub-list) [383 396])) :type "int") nil [364 1805]))
+    :file "client.c"
+    :pointmax 1806
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre4"
+  :semanticdb-version "2.0pre4"
+  )
