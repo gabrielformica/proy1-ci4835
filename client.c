@@ -7,19 +7,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
-	
+#include "myfuncions.h"	
 
 void error(char *msg) {
 	perror(msg);
 	exit(0);
 }
 
-void allocate(void *x, int size) {
-  if ((x = malloc(size)) == NULL) {
-    perror("Error malloc");
-    exit(1);
-  }
-}
 
 
 int main(int argc, char *argv[]) {
