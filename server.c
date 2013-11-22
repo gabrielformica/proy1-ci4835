@@ -7,6 +7,7 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "myfuncions.h"
 
 void error(const char *msg)
 {
@@ -14,13 +15,6 @@ void error(const char *msg)
   exit(1);
 }
 
-
-void allocate(void *x, int size) {
-  if ((x = malloc(size)) == NULL) {
-    perror("Error malloc");
-    exit(1);
-  }
-}
 
 int main(int argc, char *argv[])
 {
