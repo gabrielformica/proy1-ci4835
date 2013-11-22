@@ -7,7 +7,7 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "myfuncions.h"
+#include "myfunctions.h"
 
 void error(const char *msg)
 {
