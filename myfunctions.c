@@ -1,3 +1,4 @@
+#include "myfunctions.h"
 
 void allocate(void *x, int size) {
   if ((x = malloc(size)) == NULL) {
