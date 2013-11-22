@@ -2,3 +2,8 @@
 *.out
 client
 server
+#*
+*.cache
+.*
+
+!.gitignore
