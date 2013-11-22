@@ -55,14 +55,12 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0)
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		error("ERROR opening socket");
 
-	if ((server = gethostbyname(host)) == NULL) {
+	if ((server = gethostbyname(host)) == NULL) 
 		error("ERROR no such host");
-	}
-
+	
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	bcopy((char *)server->h_addr,
