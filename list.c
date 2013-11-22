@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
+#include "myfunctions.h"
 
 /**
   * Crea una cola vacia.
