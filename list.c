@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
-#include "myfunctions.h"
+
 
 /**
   * Crea una cola vacia.
@@ -20,8 +20,12 @@
   * @return La cola es una cola valida.
   */
 
-list create_list(list c) {
-	c = allocate(c, sizeof(list));
+list create_list() {
+	list c;
+	if ((c = malloc(sizeof(list))) == NULL) {
+		perror("ERROR creating list:");
+		exit(1);
+	}
 	c->size = 0;
 	c->first = NULL;
 	c->last = NULL;
@@ -35,24 +39,25 @@ list create_list(list c) {
  * @return La cola c, y c es una cola valida.
  */
 
-list add(list c, void *n) {
+bool add(list c, void *n) {
 	box *temp;
 
-	temp = allocate(temp, sizeof(box));
+	if ((temp = (box *) malloc(sizeof(box))) == NULL) {
+		return false;
+	}
 	temp->elem = n;
 	temp->next = NULL;
 	if (c->size == 0) {
 		c->first = temp;	
 		++(c->size);
 		c->last= temp;
-		return c;
 	}
 	else {
 		(c->last)->next = temp;
 		c->last = temp;
 		++(c->size);
 	}
-	return c;
+	return true;
 }
 
 /**

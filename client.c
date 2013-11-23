@@ -7,7 +7,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
-#include "myfunctions.h"	
 
 void error(char *msg) {
 	perror(msg);
@@ -25,8 +24,11 @@ int main(int argc, char *argv[]) {
 
 	while ((opts = getopt(argc, argv, ":h:p:n:a:")) != -1) {
 		switch (opts) {
+			int size;
 			case 'h': 
-				allocate(host,sizeof(char)*strlen(optarg));
+				if ((host = (char *) malloc(sizeof(char)*strlen(optarg))) == NULL) {
+					perror("Error malloc host");
+				}
 				host = optarg;
 				printf("Flag -h, with parameter %s\n",host);
 				break;
@@ -35,12 +37,20 @@ int main(int argc, char *argv[]) {
 				printf("Flag -p, with parameter %d\n",portno);
 				break;
 			case 'n': 
-				allocate(username,sizeof(char)*strlen(optarg));
+				size = sizeof(char)*strlen(optarg);
+				if ((username = (char *) malloc(size)) == NULL) {
+					perror("Error malloc username");
+					exit(1);
+				}
 				username = optarg;
 				printf("Flag -n, with paremeter %s\n",username);
 				break;
 			case 'a': 
-				allocate(comfile,sizeof(char)*strlen(optarg));
+				size = sizeof(char)*strlen(optarg);
+				if ((comfile = malloc(size)) == NULL) {
+					perror("Error malloc comfile");
+					exit(1);
+				}
 				comfile = optarg;
 				printf("Flag -a, with paremeter %s\n",comfile);
 				break;

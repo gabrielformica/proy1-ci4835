@@ -11,6 +11,8 @@
 
 #ifndef LIST_H 
 #define LIST_H 
+
+typedef enum { false, true } bool;
 typedef struct box box;
 typedef struct head head;
 
@@ -34,7 +36,7 @@ typedef struct head *list;
   * @return La cola es una cola valida.
   */
 
-extern list create_list(list);
+extern list create_list();
 
 
 /**
@@ -44,7 +46,7 @@ extern list create_list(list);
   * @return La cola c, y c es una cola valida.
   */
 
-extern list add(list,void *);
+extern bool add(list,void *);
 
 /**
   * Desencola un elemento de la cola.
