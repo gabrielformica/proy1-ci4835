@@ -20,9 +20,8 @@
   * @return La cola es una cola valida.
   */
 
-
 list create_list(list c) {
-	c = malloc(sizeof(list));
+	c = allocate(c, sizeof(list));
 	c->size = 0;
 	c->first = NULL;
 	c->last = NULL;
@@ -30,24 +29,24 @@ list create_list(list c) {
 }
 
 /**
-  * Anade un elemento al final de cola. 
-  * @param c Cola en question.
-  * @param n Elemento que se desea agregar.
-  * @return La cola c, y c es una cola valida.
-  */
+ * Anade un elemento al final de cola. 
+ * @param c Cola en question.
+ * @param n Elemento que se desea agregar.
+ * @return La cola c, y c es una cola valida.
+ */
 
 list add(list c, void *n) {
 	box *temp;
 
-	temp = malloc(sizeof(box));
+	temp = allocate(temp, sizeof(box));
 	temp->elem = n;
 	temp->next = NULL;
 	if (c->size == 0) {
-	        c->first = temp;	
+		c->first = temp;	
 		++(c->size);
-                c->last= temp;
+		c->last= temp;
 		return c;
-        }
+	}
 	else {
 		(c->last)->next = temp;
 		c->last = temp;
