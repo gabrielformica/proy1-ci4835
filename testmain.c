@@ -39,11 +39,11 @@ void addtenrooms(list l) {
 	
 int main(int argc, char *argv[]) {
   list rooms = initialize_rooms(NULL);
+  addtenrooms(rooms);
   printf ("cantidad de salas:  %d\n",get_size(rooms));
 
-  addtenusers(rooms,"actual");
- // printf("Nombre primera sala -%s-\n",((room *)rooms->first->elem)->name);
-  printf("tamanion de la primera sala: %d\n",get_size(((room *)rooms->first->elem)->users));
+  addtenusers(rooms,"0");
+  printf("tamanion de la sala 0: %d\n",get_size(((room *)rooms->first->next->elem)->users));
   
 }
  
