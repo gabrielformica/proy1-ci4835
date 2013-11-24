@@ -1,9 +1,7 @@
 CC= gcc -g
 
-GENFUNCO= myfunctions.o
-GENFUNCH= myfunctions.h
-LIBO= list.o ${GENFUNCO}
-LIBH= list.h ${GENFUNCH}
+LIBO= list.o roomslist.o
+LIBH= list.h roomslist.h
 
 all: server client 
 server: server.o ${LIBO}
@@ -14,9 +12,9 @@ client: client.o ${LIBO}
 	${CC} client.o ${LIBO} -o client
 client.o: client.c ${LIBH} 
 	${CC} -c client.c
-list.o: list.c list.h ${GENFUNCH}
+list.o: list.c list.h 
 	${CC} -c list.c
-myfunctions.o: myfunctions.c myfunctions.h
-	${CC} -c myfunctions.c
+roomslist.o: roomslist.c roomslist.h list.h
+	${CC} -c roomslist.c
 clean:
 	rm -f *.o server client
