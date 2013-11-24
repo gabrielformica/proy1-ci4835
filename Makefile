@@ -3,7 +3,9 @@ CC= gcc -g
 LIBO= list.o roomslist.o
 LIBH= list.h roomslist.h
 
-all: server client 
+all: server client test
+test: testmain.o ${LIBO}
+	${CC} testmain.o ${LIBO} -o testmain
 server: server.o ${LIBO}
 	${CC} server.o ${LIBO} -o server 
 server.o: server.c ${LIBH}
