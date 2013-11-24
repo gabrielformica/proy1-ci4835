@@ -1,5 +1,3 @@
-/* A simple server in the internet domain using TCP
-   The port number is passed as an argument */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,17 +6,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "list.h"
-
-typedef struct room room;
-
-struct room {
-	char *name;
-	list users;	
-};
-
+#include "roomslist.h"
 
 void error();
-list initialize_rooms();
 	
 int main(int argc, char *argv[]) {
 
@@ -52,13 +42,14 @@ int main(int argc, char *argv[]) {
 				printf("Flag -p, with parameter %d\n",portno);
 				break;
 			case '?':
+	
 				printf("ERROR with flags\n");
 				break;
 		}
 	}
 
 
-	list rooms = initialize_rooms();
+	list rooms = initialize_rooms(defname);
 	
 	
 /*****
@@ -102,26 +93,4 @@ void error(const char *msg)
 {
   perror(msg);
   exit(1);
-}
-
-list initialize_rooms(char *defname) {
-	list rooms = create_list();
-	room *defroom; 
-	if (defname == NULL) {
-		if ((defname = (char *) malloc(sizeof(char)*strlen("actual"))) == NULL) {
-			perror("ERROR malloc defname");
-			exit(1);
-		}
-		defname = "actual";
-	}
-	if ((defroom = (room *) malloc(sizeof(room))) == NULL) {
-		perror("ERROR malloc defroom");	
-		exit(1);
-	}
-	defroom->name = defname;
-	defroom->users = create_list();
-	if (! (add(rooms, defroom))) {
-		perror("Error adding element");
-	}	
-	return rooms;	
 }
