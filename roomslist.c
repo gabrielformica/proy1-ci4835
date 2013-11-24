@@ -22,8 +22,8 @@ bool add_user(list l, char *roomname, char *username) {
 
 	//Se busca el nombre de la sala	
 	box *temp = l->first;
-	while ((temp != NULL) && (((room *)temp->elem)->name != roomname)) {
-		temp = temp->next;
+	while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, roomname) != 0)) {
+      temp = temp->next;
 	} 
 	//    si no encuentra la sala, retorna false
 	if (temp == NULL)
