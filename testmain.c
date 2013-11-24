@@ -39,15 +39,11 @@ void addtenrooms(list l) {
 	
 int main(int argc, char *argv[]) {
   list rooms = initialize_rooms(NULL);
-  list rooms2 = initialize_rooms("elMac");
+  printf ("cantidad de salas:  %d\n",get_size(rooms));
 
-  addtenusers(rooms2,"elMac");
-  printf ("#########AGREGANDO SALAS#######\n\n");
-  addtenrooms(rooms);
-
-  printf ("Tamanio de sala es: %d\n",get_size(rooms));
-  
-  printf ("#########AGREGANDO USUARIOS EN SALA 4 DE rooms#######\n\n");
   addtenusers(rooms,"actual");
+ // printf("Nombre primera sala -%s-\n",((room *)rooms->first->elem)->name);
+  printf("tamanion de la primera sala: %d\n",get_size(((room *)rooms->first->elem)->users));
+  
 }
  
