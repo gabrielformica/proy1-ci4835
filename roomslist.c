@@ -22,18 +22,18 @@ bool add_user(list l, char *roomname, char *username) {
 
 	//Se busca el nombre de la sala	
 	box *temp = l->first;
-	while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, roomname) != 0)) {
-      temp = temp->next;
-	} 
+	
+	while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, roomname) != 0))
+		temp = temp->next;
+
 	//    si no encuentra la sala, retorna false
 	if (temp == NULL)
 		return false;
 
 	//    si lo encuentra, busca al usuario
 	box *temp2 = ((room *) temp->elem)->users->first;
-	while ((temp2 != NULL) && ((char *) temp2->elem != username)) {
+	while ((temp2 != NULL) && (strcmp((char *) temp2->elem, username) != 0))
 		temp2 = temp2->next;
-	}
 
 	//				si el usuario no esta, lo agrega y retorna true
 	if (temp2 != NULL)
@@ -47,15 +47,21 @@ bool add_room(list l, char *name) {
 		perror("ERROR passing empty list");
 		exit(1);
 	}
+
 	if (name == NULL) {
 		perror("ERROR room name");
 		exit(1);
 	}
+
+	if (room_is_in(name,l))
+		return false;
+
 	room *temp;	
 	if ((temp = (room *) malloc(sizeof(room))) == NULL) {
 		perror("ERROR malloc room");
 		return false;
 	}
+	
 	temp->name = name;
 	temp->users = create_list();
 	return (add(l,temp));
@@ -77,4 +83,10 @@ list initialize_rooms(char *defname) {
 	return rooms;	
 }
 
+bool room_is_in(char *name, list l) {
+	box *temp = l->first;
+	while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, name) != 0))
+		temp = temp->next;
 
+	return (temp != NULL);
+}
