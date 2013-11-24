@@ -22,7 +22,7 @@
 
 list create_list() {
 	list c;
-	if ((c = malloc(sizeof(list))) == NULL) {
+	if ((c = malloc(sizeof(head))) == NULL) {
 		perror("ERROR creating list:");
 		exit(1);
 	}
