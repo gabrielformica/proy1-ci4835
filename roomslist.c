@@ -36,7 +36,7 @@ bool add_user(list l, char *roomname, char *username) {
 		temp2 = temp2->next;
 
 	//				si el usuario no esta, lo agrega y retorna true
-	if (temp2 != NULL)
+	if (temp2 == NULL)
 		return add(((room *)temp->elem)->users, username);			
 	//				si el usuario esta, lo agrega con nombre(i) y retornar true				
 	return true;
