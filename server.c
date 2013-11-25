@@ -69,9 +69,13 @@ int main(int argc, char *argv[]) {
 
 
 	/* Aquí empiezan a hacerse los hilos */
+	thread_t threads[4];	
+	pthread_create(&threads[2],NULL,(void *)funct,);
+
 
 	listen(sockfd,5);
 	clilen = sizeof(cli_addr);
+
 	newsockfd = accept(sockfd, 
 							(struct sockaddr *) &cli_addr, 
 							&clilen);
