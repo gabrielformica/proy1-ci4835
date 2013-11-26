@@ -119,56 +119,53 @@ void *connection_handler(void *td) {
 	printf("este es el socket: -%d-\n",sock);
 	printf("este es el defname: -%s-\n", ((room *)rooms->first->elem)->name);
 	printf("");
-	char *message;
+	char message[256];
+	/*
 	if ((message = malloc(sizeof(char)*256)) == NULL) {
 		perror("ERROR malloc message");
 	}
+	*/
 	memset(message, 0, 256);
 	
 	box *user = NULL;
 	user = wait_username(rooms, message, sock);  //user points to the box of the user
 	printf("este es el nombre de usuario: -%s-\n", ((char *) user->elem));
 	
-	int length = strlen(message);
 	int read_size;
-	while ((read_size = recv(sock, message, length, 0)) > 0) {
+	while ((read_size = recv(sock, message, 256, 0)) > 0) {
 		
 		pthread_mutex_lock(&mutex);
 		if (read_size < 3) {
-			message = "error with command";
-		}
-		else if (message[3] != ' ') {
-			message = "error with command";
 		}
 		else if ((message[0] == 's') && (message[1] == 'u') && (message[2] == 's')) {
 			printf("HOLAAAAAA \n");
 		}
 		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
-			message = "Mandaste SAL";
+			//message = "Mandaste SAL";
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
-			message = "Mandaste MEN";
+		//	message = "Mandaste MEN";
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
-			message = "Mandaste USU";
+		//	message = "Mandaste USU";
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
-			message = "Mandaste DES";
+		//	message = "Mandaste DES";
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
-			message = "Mandaste CRE";
+		//	message = "Mandaste CRE";
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
-			message = "Mandaste ELI";
+		//	message = "Mandaste ELI";
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
-			message = "Mandaste FUE";
+	//		message = "Mandaste FUE";
 			write(sock, message, strlen(client_message));	
 		}
 		//funcion que ejecuta la funcion correspondiente con el comando
