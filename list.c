@@ -39,11 +39,11 @@ list create_list() {
  * @return La cola c, y c es una cola valida.
  */
 
-bool add(list c, void *n) {
+box *add(list c, void *n) {
 	box *temp;
 
 	if ((temp = (box *) malloc(sizeof(box))) == NULL) {
-		return false;
+		return NULL;
 	}
 	temp->elem = n;
 	temp->next = NULL;
@@ -57,7 +57,7 @@ bool add(list c, void *n) {
 		c->last = temp;
 		++(c->size);
 	}
-	return true;
+	return temp;
 }
 
 /**

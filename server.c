@@ -15,12 +15,13 @@ pthread_mutex_t mutex;
 char client_message[2000];
 
 typedef struct thread_data thread_data;
-
 struct thread_data {
    int client_sock;
-   pthread_t client_thread;
+	list rooms; 
 };
-	
+
+thread_data prepare_thread_data();
+
 int main(int argc, char *argv[]) {
 
 	/* declare */
@@ -77,17 +78,15 @@ int main(int argc, char *argv[]) {
 	/* Aquí empiezan a hacerse los hilos */
 
 	listen(sockfd,3);
-	
 	clilen = sizeof(cli_addr);
-
 	pthread_t thread_id;
-
 	pthread_mutex_init(&mutex,NULL);
 	while (client_sock = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
 		printf("Connection accepted\n");
+		thread_data tdata = prepare_thread_data(client_sock, rooms);
 		
 		if (pthread_create(&thread_id, NULL, connection_handler, 
-												(void *) &client_sock) ) {
+												(void *) &tdata) ) {
 			perror("could not create thread");
 			exit(1);
 		}
@@ -100,23 +99,37 @@ int main(int argc, char *argv[]) {
 
 
 
+thread_data prepare_thread_data(int client_sock, list rooms) {
+	thread_data temp; 
+	temp.client_sock = client_sock;
+	temp.rooms = rooms;
+	return temp;
+}
 
 void error(const char *msg) {
   perror(msg);
   exit(1);
 }
 
-void *connection_handler(void *socket_desc) {
+void *connection_handler(void *td) {
+	int sock = ((thread_data *) td)->client_sock;
+	list rooms = ((thread_data *) td)->rooms;	
+	char message[256];
+	int length = strlen(message);
+	int read_size;
+	box *user = NULL;
+	if ((read_size = recv(sock, message, length, 0)) > 0) {
+		pthread_mutex_lock(&mutex);
+		user = add_user(rooms, rooms->first->elem->name, message);	
+		pthread_mutex_unlock(&mutex);
+	}
 	//funcion
 		//Primer ciclo que pide el nombre de usuario
 		//mutex lock
 		//se agrega en el heap caja con usuario a la sala por defecto 
 		//mutex unlock
 	//
-	int sock = *(int *) socket_desc;
-	int read_size;
-	char message[2000];
-	while ((read_size = recv(sock, message, 2000, 0)) > 0) {
+	while ((read_size = recv(sock, message, length, 0)) > 0) {
 		
 		pthread_mutex_lock(&mutex);
 		//se parsea el comando
@@ -131,7 +144,6 @@ void *connection_handler(void *socket_desc) {
 	}
 
 }
-
 
 
 //funcion sal 

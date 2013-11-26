@@ -6,7 +6,7 @@
 
 #define DEFAULT "actual"
 
-bool add_user(list l, char *roomname, char *username) {
+box *add_user(list l, char *roomname, char *username) {
 	if (roomname == NULL) {
 		perror("ERROR room name");
 		exit(1);
@@ -28,21 +28,13 @@ bool add_user(list l, char *roomname, char *username) {
 
 	//    si no encuentra la sala, retorna false
 	if (temp == NULL)
-		return false;
+		return NULL;
 
-	//    si lo encuentra, busca al usuario
-	box *temp2 = ((room *) temp->elem)->users->first;
-	while ((temp2 != NULL) && (strcmp((char *) temp2->elem, username) != 0))
-		temp2 = temp2->next;
+	return add(((room *)temp->elem)->users, username);			
 
-	//				si el usuario no esta, lo agrega y retorna true
-	if (temp2 == NULL)
-		return add(((room *)temp->elem)->users, username);			
-	//				si el usuario esta, lo agrega con nombre(i) y retornar true				
-	return true;
 }
 
-bool add_room(list l, char *name) {
+box *add_room(list l, char *name) {
 	if (l == NULL) {
 		perror("ERROR passing empty list");
 		exit(1);
@@ -54,12 +46,12 @@ bool add_room(list l, char *name) {
 	}
 
 	if (room_is_in(name,l))
-		return false;
+		return NULL;
 
 	room *temp;	
 	if ((temp = (room *) malloc(sizeof(room))) == NULL) {
 		perror("ERROR malloc room");
-		return false;
+		return NULL;
 	}
 	
 	temp->name = name;

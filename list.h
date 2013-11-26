@@ -46,7 +46,7 @@ extern list create_list();
   * @return La cola c, y c es una cola valida.
   */
 
-extern bool add(list,void *);
+extern box *add(list,void *);
 
 /**
   * Desencola un elemento de la cola.
