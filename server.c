@@ -13,6 +13,8 @@ void error();
 void *connection_handler();
 pthread_mutex_t mutex;
 char client_message[2000];
+
+int sock001, sock002;
 	
 int main(int argc, char *argv[]) {
 
@@ -102,6 +104,7 @@ void *connection_handler(void *socket_desc) {
 	while ((read_size = recv(sock, client_message, 2000, 0)) > 0) {
 		client_message[read_size] = '\0';
 		write(sock, client_message, strlen(client_message));	
+		write(sock001, client_message, strlen(client_message));
 		memset(client_message, 0, 2000);
 	}
 }
