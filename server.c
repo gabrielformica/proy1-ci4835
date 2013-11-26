@@ -116,9 +116,19 @@ void error(const char *msg) {
 void *connection_handler(void *td) {
 	int sock = ((thread_data *) td)->client_sock;
 	list rooms = ((thread_data *) td)->rooms;	
-	char message[256];
+	printf("este es el socket: -%d-\n",sock);
+	printf("este es el defname: -%s-\n", ((room *)rooms->first->elem)->name);
+	printf("");
+	char *message;
+	if ((message = malloc(sizeof(char)*256)) == NULL) {
+		perror("ERROR malloc message");
+	}
+	memset(message, 0, 256);
+	
 	box *user = NULL;
 	user = wait_username(rooms, message, sock);  //user points to the box of the user
+	printf("este es el nombre de usuario: -%s-\n", ((char *) user->elem));
+	
 	int length = strlen(message);
 	int read_size;
 	while ((read_size = recv(sock, message, length, 0)) > 0) {
@@ -131,44 +141,65 @@ void *connection_handler(void *td) {
 			message = "error with command";
 		}
 		else if ((message[0] == 's') && (message[1] == 'u') && (message[2] == 's')) {
+			printf("HOLAAAAAA \n");
 		}
 		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
+			message = "Mandaste SAL";
+			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
+			message = "Mandaste MEN";
+			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
+			message = "Mandaste USU";
+			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
+			message = "Mandaste DES";
+			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
+			message = "Mandaste CRE";
+			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
+			message = "Mandaste ELI";
+			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
+			message = "Mandaste FUE";
+			write(sock, message, strlen(client_message));	
 		}
 		//funcion que ejecuta la funcion correspondiente con el comando
+		/*
 		int i;
 		for (i = 0; i < read_size; i++)
 			client_message[i] = message[i];	
 		client_message[read_size] = '\0';
 		write(sock, client_message, strlen(client_message));	
 		memset(client_message, 0, 2000);
+		*/
+		memset(message, 0, strlen(message));
 		pthread_mutex_unlock(&mutex);
 	}
 
 }
 
 box *wait_username(list rooms, char *str, int sock) {
+	char buffer[40];
+	bzero(buffer,40);
 	int read_size;
-	int length = strlen(str);
 	box *user = NULL;
-	if ((read_size = recv(sock, str, length, 0)) > 0) {
+	if ((read_size = recv(sock, buffer, 40, 0)) > 0) {
 		pthread_mutex_lock(&mutex);
-		char *user_name = malloc(sizeof(read_size));
+		char *user_name;
+		if ((user_name =  malloc(sizeof(char)*read_size)) == NULL) {
+			perror("ERRRO malloc");
+		}
 		int i;
-		for (i = 0; i < read_size; i++)
-			user_name[i] = str[i];
-		
+		for (i = 0; i < read_size; i++) 
+			user_name[i] = buffer[i];
 		user = add_user(rooms, ((room *)rooms->first->elem)->name, user_name);	
 		pthread_mutex_unlock(&mutex);
 	}

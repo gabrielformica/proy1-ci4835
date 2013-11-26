@@ -12,13 +12,14 @@
 void error();
 void *reading_stdin();
 pthread_mutex_t mutex;
+char *username;
 
 
 int main(int argc, char *argv[]) {
        
 
    int sockfd, portno, charsno;
-   char opts, *host, *username, *comfile, buffer[256];
+   char opts, *host, *comfile, buffer[256];
    struct sockaddr_in serv_addr;	
    struct hostent *server;
 
@@ -86,8 +87,8 @@ int main(int argc, char *argv[]) {
    }
    
    while (1) {
-      bzero(buffer,strlen(buffer));
-      charsno = read(sockfd, buffer, strlen(buffer)-1);
+      bzero(buffer,256);
+      charsno = read(sockfd, buffer, 256);
       if (charsno < 0)
          error("Error reading from sockets");
       printf ("%s",buffer);
@@ -113,10 +114,11 @@ void *reading_stdin(void *sockfd) {
    int sock = *(int *) sockfd;
    char message[256];
 
+	write(sock, username, strlen(username));
    while(1) {
       fgets(message,256,stdin);
       pthread_mutex_lock(&mutex);
-      write(sock,message,strlen(message));
+      write(sock,message,256);
       bzero(message,256);
       pthread_mutex_unlock(&mutex);
    }
