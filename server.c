@@ -99,8 +99,12 @@ void error(const char *msg) {
 void *connection_handler(void *socket_desc) {
 	int sock = *(int *) socket_desc;
 	int read_size;
-	while ((read_size = recv(sock, client_message, 2000, 0)) > 0) {
+	char message[2000];
+	while ((read_size = recv(sock, message, 2000, 0)) > 0) {
 		pthread_mutex_lock(&mutex);
+		int i;
+		for (i = 0; i < read_size; i++)
+			client_message[i] = message[i];	
 		client_message[read_size] = '\0';
 		write(sock, client_message, strlen(client_message));	
 		memset(client_message, 0, 2000);
