@@ -13,8 +13,6 @@ void error(char *msg) {
 	exit(0);
 }
 
-
-
 int main(int argc, char *argv[]) {
 
 	int sockfd, portno, charno;
@@ -75,6 +73,20 @@ int main(int argc, char *argv[]) {
 		error("ERROR connecting");
 	}
 	printf("You are connected\n");
+	while (1) {
+		printf("Enter a message:");
+		bzero(buffer,256);
+		fgets(buffer,255,stdin);
+		charno = write(sockfd, buffer, strlen(buffer));
+		if (charno < 0)
+			error("ERROR writing to socket");
+		bzero(buffer,256);
+		charno = read(sockfd, buffer, 255);
+		if (charno < 0)
+			error("ERROR reading from socket");
+		printf("%s",buffer);
+	}
+	
 
 /*
 	close(sockfd);

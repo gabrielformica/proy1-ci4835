@@ -5,16 +5,19 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include "list.h"
 #include "roomslist.h"
 
 void error();
+void *connection_handler();
+pthread_mutex_t mutex;
 	
 int main(int argc, char *argv[]) {
 
 	/* declare */
 	char opts;
-	int sockfd, newsockfd, portno;
+	int sockfd, client_sock, portno;
 	socklen_t clilen;
 	char buffer[256];
 	char *defname = NULL;
@@ -35,7 +38,7 @@ int main(int argc, char *argv[]) {
 					exit(1);	
 				}
 				defname = optarg;
-				printf("Flag -h, with parameter %s\n",defname);
+				printf("Flag -s, with parameter %s\n",defname);
 				break;
 			case 'p':
 				portno = atoi(optarg);
@@ -51,12 +54,6 @@ int main(int argc, char *argv[]) {
 
 	list rooms = initialize_rooms(defname);
 	
-	
-/*****
-
-*/
-
-
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) 
 		error("ERROR opening socket");
@@ -64,37 +61,60 @@ int main(int argc, char *argv[]) {
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
+
 	if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
 		error("ERROR on binding");
 
 
 	/* Aquí empiezan a hacerse los hilos */
-	thread_t threads[4];	
-	pthread_create(&threads[2],NULL,(void *)funct,);
 
-
-	listen(sockfd,5);
+	listen(sockfd,3);
+	
 	clilen = sizeof(cli_addr);
 
-	newsockfd = accept(sockfd, 
-							(struct sockaddr *) &cli_addr, 
-							&clilen);
-	if (newsockfd < 0) 
-		error("ERROR on accept");
+	pthread_t thread_id;
+
+	pthread_mutex_init(&mutex,NULL);
+	while (client_sock = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
+		printf("Connection accepted\n");
+		if (pthread_create(&thread_id, NULL, connection_handler, 
+												(void *) &client_sock) ) {
+			perror("could not create thread");
+			exit(1);
+		}
+		pthread_join( thread_id, NULL);
+		
+	}
+
+	if (client_sock < 0) 
+		error("ERROR accepting connection");
+
 	bzero(buffer,256);
-	n = read(newsockfd,buffer,255);
+	n = read(client_sock,buffer,255);
 	if (n < 0) error("ERROR reading from socket");
 	printf("Here is the message: %s\n",buffer);
-	n = write(newsockfd,"I got your message",18);
+	n = write(client_sock,"I got your message",18);
 	if (n < 0) error("ERROR writing to socket");
-	close(newsockfd);
+	close(client_sock);
 	close(sockfd);
 	return 0; 
 }
 
 
-void error(const char *msg)
-{
+void error(const char *msg) {
   perror(msg);
   exit(1);
+}
+
+void *connection_handler(void *socket_desc) {
+	int sock = *(int *) socket_desc;
+	int read_size;
+	char *message, client_message[2000];
+	while ((read_size = recv(sock, client_message, 2000, 0)) > 0) {
+		pthread_mutex_lock(&mutex);
+		client_message[read_size] = '\0';
+		write(sock, client_message, strlen(client_message));	
+		memset(client_message, 0, 2000);
+		pthread_mutex_unlock(&mutex);
+	}
 }
