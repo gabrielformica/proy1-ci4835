@@ -10,6 +10,7 @@
 #include "roomslist.h"
 
 void error();
+void sal();
 void *connection_handler();
 box *wait_username();
 pthread_mutex_t mutex;
@@ -128,9 +129,10 @@ void *connection_handler(void *td) {
 	memset(message, 0, 256);
 	
 	box *user = NULL;
+
 	user = wait_username(rooms, message, sock);  //user points to the box of the user
 	printf("este es el nombre de usuario: -%s-\n", ((char *) user->elem));
-	
+    box *current_room = rooms->first;	
 	int read_size;
 	while ((read_size = recv(sock, message, 256, 0)) > 0) {
 		
@@ -141,10 +143,10 @@ void *connection_handler(void *td) {
 			printf("HOLAAAAAA \n");
 		}
 		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
-			//message = "Mandaste SAL";
-			write(sock, message, strlen(client_message));	
-		}
-		else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
+           //message = "Mandaste SAL";
+           sal(rooms,sock);
+        } 
+        else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
 		//	message = "Mandaste MEN";
 			write(sock, message, strlen(client_message));	
 		}
@@ -205,6 +207,19 @@ box *wait_username(list rooms, char *str, int sock) {
 
 //funcion sal 
 	//imprime la rooms nada mas ese socket
+void sal(list l, int sock) {
+   if ((l == NULL) || (get_size(l) == 0)) {
+      write(sock, "There are no rooms available\n", 50);
+      return;
+   }
+   box *temp = l->first;
+   while (temp != NULL) {
+      write(sock, ((room *) temp->elem)->name, 10);
+      write(sock, "\n", 2);
+      temp = temp->next;
+   }
+
+}
 
 //funcion usu
 	//le imprime a ese usuario todos los usuarios conectados en el servidor
