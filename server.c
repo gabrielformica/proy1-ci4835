@@ -11,8 +11,10 @@
 
 void error();
 void *connection_handler();
+box *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
+
 
 typedef struct thread_data thread_data;
 struct thread_data {
@@ -115,24 +117,35 @@ void *connection_handler(void *td) {
 	int sock = ((thread_data *) td)->client_sock;
 	list rooms = ((thread_data *) td)->rooms;	
 	char message[256];
+	box *user = NULL;
+	user = wait_username(rooms, message, sock);  //user points to the box of the user
 	int length = strlen(message);
 	int read_size;
-	box *user = NULL;
-	if ((read_size = recv(sock, message, length, 0)) > 0) {
-		pthread_mutex_lock(&mutex);
-		user = add_user(rooms, rooms->first->elem->name, message);	
-		pthread_mutex_unlock(&mutex);
-	}
-	//funcion
-		//Primer ciclo que pide el nombre de usuario
-		//mutex lock
-		//se agrega en el heap caja con usuario a la sala por defecto 
-		//mutex unlock
-	//
 	while ((read_size = recv(sock, message, length, 0)) > 0) {
 		
 		pthread_mutex_lock(&mutex);
-		//se parsea el comando
+		if (read_size < 3) {
+			message = "error with command";
+		}
+		else if (message[3] != ' ') {
+			message = "error with command";
+		}
+		else if ((message[0] == 's') && (message[1] == 'u') && (message[2] == 's')) {
+		}
+		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
+		}
+		else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
+		}
+		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
+		}
+		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
+		}
+		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
+		}
+		else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
+		}
+		else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
+		}
 		//funcion que ejecuta la funcion correspondiente con el comando
 		int i;
 		for (i = 0; i < read_size; i++)
@@ -145,6 +158,22 @@ void *connection_handler(void *td) {
 
 }
 
+box *wait_username(list rooms, char *str, int sock) {
+	int read_size;
+	int length = strlen(str);
+	box *user = NULL;
+	if ((read_size = recv(sock, str, length, 0)) > 0) {
+		pthread_mutex_lock(&mutex);
+		char *user_name = malloc(sizeof(read_size));
+		int i;
+		for (i = 0; i < read_size; i++)
+			user_name[i] = str[i];
+		
+		user = add_user(rooms, ((room *)rooms->first->elem)->name, user_name);	
+		pthread_mutex_unlock(&mutex);
+	}
+	return user;	
+}
 
 //funcion sal 
 	//imprime la rooms nada mas ese socket
