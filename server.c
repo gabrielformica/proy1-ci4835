@@ -232,10 +232,15 @@ void usu(list l, int sock) {
          continue;
       }
       while (temp2 != NULL) {
-
-         while(write(sock,((char *) temp2->elem), 
-                     strlen(((char *) temp2->elem))) <= 0);
-         while(write(sock, "\n", 2) <= 0 );
+         int len = strlen(((char *) temp2->elem));
+         char *b = malloc(sizeof(char)*(len+1));
+         int i;
+         for (i = 0; i < len; i++)
+            b[i] = ((char *) temp2->elem)[i];
+            
+         b[len] = '\0';
+         write(sock, b, len+1);
+         write(sock, "\n\0", 3);
          temp2 = temp2->next;
       }
       temp = temp->next;

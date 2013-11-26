@@ -85,13 +85,15 @@ int main(int argc, char *argv[]) {
       perror("Could not create thread");
       exit(1);
    }
-   bzero(buffer,256);
+
    while (1) {
-      charsno = read(sockfd, buffer, 256);
+      bzero(buffer,256);
+      charsno = recv(sockfd, buffer, 256, 0);
+      pthread_mutex_lock(&mutex);
       if (charsno < 0)
          error("Error reading from sockets");
       printf ("%s",buffer);
-      bzero(buffer, charsno);
+      pthread_mutex_unlock(&mutex);
    }
 	
 
