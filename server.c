@@ -100,10 +100,8 @@ void *connection_handler(void *socket_desc) {
 	int sock = *(int *) socket_desc;
 	int read_size;
 	while ((read_size = recv(sock, client_message, 2000, 0)) > 0) {
-		pthread_mutex_lock(&mutex);
 		client_message[read_size] = '\0';
 		write(sock, client_message, strlen(client_message));	
 		memset(client_message, 0, 2000);
-		pthread_mutex_unlock(&mutex);
 	}
 }
