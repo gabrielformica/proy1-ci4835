@@ -12,6 +12,7 @@
 void error();
 void *connection_handler();
 pthread_mutex_t mutex;
+char client_message[2000];
 	
 int main(int argc, char *argv[]) {
 
@@ -82,21 +83,10 @@ int main(int argc, char *argv[]) {
 			perror("could not create thread");
 			exit(1);
 		}
-		pthread_join( thread_id, NULL);
-		
 	}
 
 	if (client_sock < 0) 
 		error("ERROR accepting connection");
-
-	bzero(buffer,256);
-	n = read(client_sock,buffer,255);
-	if (n < 0) error("ERROR reading from socket");
-	printf("Here is the message: %s\n",buffer);
-	n = write(client_sock,"I got your message",18);
-	if (n < 0) error("ERROR writing to socket");
-	close(client_sock);
-	close(sockfd);
 	return 0; 
 }
 
@@ -109,7 +99,6 @@ void error(const char *msg) {
 void *connection_handler(void *socket_desc) {
 	int sock = *(int *) socket_desc;
 	int read_size;
-	char *message, client_message[2000];
 	while ((read_size = recv(sock, client_message, 2000, 0)) > 0) {
 		pthread_mutex_lock(&mutex);
 		client_message[read_size] = '\0';
