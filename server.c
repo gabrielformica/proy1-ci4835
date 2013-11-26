@@ -13,6 +13,13 @@ void error();
 void *connection_handler();
 pthread_mutex_t mutex;
 char client_message[2000];
+
+typedef struct thread_data thread_data;
+
+struct thread_data {
+   int client_sock;
+   pthread_t client_thread;
+};
 	
 int main(int argc, char *argv[]) {
 
@@ -92,6 +99,8 @@ int main(int argc, char *argv[]) {
 }
 
 
+
+
 void error(const char *msg) {
   perror(msg);
   exit(1);
@@ -122,6 +131,8 @@ void *connection_handler(void *socket_desc) {
 	}
 
 }
+
+
 
 //funcion sal 
 	//imprime la rooms nada mas ese socket
