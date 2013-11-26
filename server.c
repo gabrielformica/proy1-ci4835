@@ -78,10 +78,20 @@ int main(int argc, char *argv[]) {
 	pthread_t thread_id;
 
 	pthread_mutex_init(&mutex,NULL);
-	while (client_sock = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
+	if (sock001 = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
+		printf("Connection accepted\n");
+		
+		if (pthread_create(&thread_id, NULL, connection_handler, 
+												(void *) &sock001) ) {
+			perror("could not create thread");
+			exit(1);
+		}
+	}
+
+	while (sock002 = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
 		printf("Connection accepted\n");
 		if (pthread_create(&thread_id, NULL, connection_handler, 
-												(void *) &client_sock) ) {
+												(void *) &sock002) ) {
 			perror("could not create thread");
 			exit(1);
 		}
@@ -99,12 +109,41 @@ void error(const char *msg) {
 }
 
 void *connection_handler(void *socket_desc) {
+	//funcion
+		//Primer ciclo que pide el nombre de usuario
+		//mutex lock
+		//se agrega en el heap caja con usuario a la sala por defecto 
+		//mutex unlock
+	//
 	int sock = *(int *) socket_desc;
 	int read_size;
-	while ((read_size = recv(sock, client_message, 2000, 0)) > 0) {
+	char message[2000];
+	while ((read_size = recv(sock, message, 2000, 0)) > 0) {
+		
+		pthread_mutex_lock(&mutex);
+		//se parsea el comando
+		//funcion que ejecuta la funcion correspondiente con el comando
+		int i;
+		for (i = 0; i < read_size; i++)
+			client_message[i] = message[i];	
 		client_message[read_size] = '\0';
 		write(sock, client_message, strlen(client_message));	
 		write(sock001, client_message, strlen(client_message));
 		memset(client_message, 0, 2000);
+		pthread_mutex_unlock(&mutex);
 	}
+
 }
+
+//funcion sal 
+	//imprime la rooms nada mas ese socket
+
+//funcion usu
+	//le imprime a ese usuario todos los usuarios conectados en el servidor
+
+//funcion men $1
+	//
+
+
+//funcion sus
+

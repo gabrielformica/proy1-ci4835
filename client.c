@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <netdb.h> 
 
 void error(char *msg) {
@@ -13,7 +14,24 @@ void error(char *msg) {
 	exit(0);
 }
 
+pthread_mutex_t mutex;
+void *reading(void * sockfd) {
+	int sock = *(int *) sockfd;	
+	char m[2000];
+	while (1) {
+		printf("Enter a message:");
+		fgets(m,2000,stdin);
+		pthread_mutex_lock(&mutex);
+		write(sock, m, strlen(m));
+		bzero(m,2000);
+		pthread_mutex_unlock(&mutex);
+
+	}
+}
+
+
 int main(int argc, char *argv[]) {
+	pthread_mutex_init(&mutex,NULL);
 
 	int sockfd, portno, charno;
 	char opts, *host, *username, *comfile, buffer[256];
@@ -73,13 +91,14 @@ int main(int argc, char *argv[]) {
 		error("ERROR connecting");
 	}
 	printf("You are connected\n");
+	pthread_t pthread_id; 
+	if (pthread_create(&pthread_id, NULL, reading, 
+												(void *) &sockfd) ) {
+		perror("could not create thread");
+		exit(1);
+	}
+
 	while (1) {
-		printf("Enter a message:");
-		bzero(buffer,256);
-		fgets(buffer,255,stdin);
-		charno = write(sockfd, buffer, strlen(buffer));
-		if (charno < 0)
-			error("ERROR writing to socket");
 		bzero(buffer,256);
 		charno = read(sockfd, buffer, 255);
 		if (charno < 0)

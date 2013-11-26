@@ -1,4 +1,4 @@
-CC= gcc -g
+CC= gcc -g -lpthread
 
 LIBO= list.o roomslist.o
 LIBH= list.h roomslist.h
@@ -7,9 +7,9 @@ all: server client test
 test: testmain.o ${LIBO}
 	${CC} testmain.o ${LIBO} -o testmain
 server: server.o ${LIBO}
-	${CC} -lpthread server.o ${LIBO} -o server 
+	${CC} server.o ${LIBO} -o server 
 server.o: server.c ${LIBH}
-	${CC} -lpthread -c server.c
+	${CC} -c server.c
 client: client.o ${LIBO}
 	${CC} client.o ${LIBO} -o client
 client.o: client.c ${LIBH} 
