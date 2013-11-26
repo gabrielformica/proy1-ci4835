@@ -7,9 +7,9 @@ all: server client test
 test: testmain.o ${LIBO}
 	${CC} testmain.o ${LIBO} -o testmain
 server: server.o ${LIBO}
-	${CC} server.o ${LIBO} -o server 
+	${CC} -lpthread server.o ${LIBO} -o server 
 server.o: server.c ${LIBH}
-	${CC} -c server.c
+	${CC} -lpthread -c server.c
 client: client.o ${LIBO}
 	${CC} client.o ${LIBO} -o client
 client.o: client.c ${LIBH} 
