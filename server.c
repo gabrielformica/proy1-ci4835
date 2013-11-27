@@ -15,15 +15,17 @@ void sal();
 void usu();
 void cre();
 void *connection_handler();
-box *wait_username();
+user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
+
+list rooms;
 
 
 typedef struct thread_data thread_data;
 struct thread_data {
    int client_sock;
-	list rooms; 
+	list subscribed_rooms; 
 };
 
 thread_data prepare_thread_data();
@@ -67,7 +69,9 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	list rooms = initialize_rooms(defname);
+	rooms = initialize_rooms(defname);
+	add_room(rooms,"A");
+	
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) 
 		error("ERROR opening socket");
@@ -91,7 +95,7 @@ int main(int argc, char *argv[]) {
        int result = setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY,
                                (char *) &flag, sizeof(int));
 		printf("Connection accepted\n");
-		thread_data tdata = prepare_thread_data(client_sock, rooms);
+		thread_data tdata = prepare_thread_data(client_sock, create_list());
 		
 		if (pthread_create(&thread_id, NULL, connection_handler, 
 												(void *) &tdata) ) {
@@ -107,10 +111,10 @@ int main(int argc, char *argv[]) {
 
 
 
-thread_data prepare_thread_data(int client_sock, list rooms) {
+thread_data prepare_thread_data(int client_sock, list l) {
 	thread_data temp; 
 	temp.client_sock = client_sock;
-	temp.rooms = rooms;
+	temp.subscribed_rooms = l;
 	return temp;
 }
 
@@ -119,25 +123,21 @@ void error(const char *msg) {
   exit(1);
 }
 
+void subscribe(list subs_rooms, char *roomname) {
+	add(subs_rooms, get_room(rooms,roomname));
+	printf("Te acabas de subscribir a: -%s-\n",((room *)subs_rooms->first->next->elem)->name);
+}
+
 void *connection_handler(void *td) {
 	int sock = ((thread_data *) td)->client_sock;
-	list rooms = ((thread_data *) td)->rooms;	
-	printf("este es el socket: -%d-\n",sock);
-	printf("este es el defname: -%s-\n", ((room *)rooms->first->elem)->name);
-	printf("");
+	list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
+	char aux[30];
 	char message[256];
-	/*
-	if ((message = malloc(sizeof(char)*256)) == NULL) {
-		perror("ERROR malloc message");
-	}
-	*/
 	memset(message, 0, 256);
-	
-	box *user = NULL;
 
-	user = wait_username(rooms, message, sock);  //user points to the box of the user
-	printf("este es el nombre de usuario: -%s-\n", ((char *) user->elem));
-    box *current_room = rooms->first;	
+	user_data *user = wait_username(rooms, sock);  //user points to the box of the user
+	printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
+   add(subscribed_rooms, rooms->first);	
 	int read_size;
 	while ((read_size = recv(sock, message, 256, 0)) > 0) {
 		
@@ -145,9 +145,20 @@ void *connection_handler(void *td) {
 		if (read_size < 3) {
 		}
 		else if ((message[0] == 's') && (message[1] == 'u') && (message[2] == 's')) {
-			printf("HOLAAAAAA \n");
+			printf("holaa\n");
+			int i	= 0;	
+			memset(aux, 0, 30);
+		
+			while  (message[i+4] != '\n') {
+				aux[i] = message[i+4];
+				i++;
+			}
+
+			printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
+			//subscribe(subscribed_rooms, name);
 		}
 		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
+			
            //message = "Mandaste SAL";
            sal(rooms, sock);
         } 
@@ -175,27 +186,23 @@ void *connection_handler(void *td) {
 	//		message = "Mandaste FUE";
 			write(sock, message, strlen(client_message));	
 		}
-		//funcion que ejecuta la funcion correspondiente con el comando
-		/*
-		int i;
-		for (i = 0; i < read_size; i++)
-			client_message[i] = message[i];	
-		client_message[read_size] = '\0';
-		write(sock, client_message, strlen(client_message));	
-		memset(client_message, 0, 2000);
-		*/
 		memset(message, 0, strlen(message));
 		pthread_mutex_unlock(&mutex);
 	}
 
 }
 
-box *wait_username(list rooms, char *str, int sock) {
+
+user_data *wait_username(list rooms, int socket) {
+	user_data *ud = NULL;
+	if ((ud = malloc(sizeof(user_data))) == NULL) {
+		perror("Error malloc");
+	}
 	char buffer[40];
 	bzero(buffer,40);
 	int read_size;
 	box *user = NULL;
-	if ((read_size = recv(sock, buffer, 40, 0)) > 0) {
+	if ((read_size = recv(socket, buffer, 40, 0)) > 0) {
 		pthread_mutex_lock(&mutex);
 		char *user_name;
 		if ((user_name =  malloc(sizeof(char)*read_size)) == NULL) {
@@ -204,10 +211,11 @@ box *wait_username(list rooms, char *str, int sock) {
 		int i;
 		for (i = 0; i < read_size; i++) 
 			user_name[i] = buffer[i];
-		user = add_user(rooms, ((room *)rooms->first->elem)->name, user_name);	
+		ud = create_user_data(user_name, socket);	
+		user = add_user(rooms, ((room *)rooms->first->elem)->name, ud);	
 		pthread_mutex_unlock(&mutex);
 	}
-	return user;	
+	return ud;	
 }
 
 
