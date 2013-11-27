@@ -15,6 +15,8 @@ void sal();
 void usu();
 void cre();
 void subscribe();
+void men();
+void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
@@ -166,8 +168,13 @@ void *connection_handler(void *td) {
            sal(sock);
       } 
       else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
-		//	message = "Mandaste MEN";
-			write(sock, message, strlen(client_message));	
+			int i	= 0;	
+			memset(aux, 0, 30);
+			while  (message[i+4] != '\n') {
+				aux[i] = message[i+4];
+				i++;
+			}
+			men(subscribed_rooms, aux);
 		}
 		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
            usu(sock); 
@@ -235,6 +242,23 @@ void sal(int sock) {
       temp = temp->next;
    }
 
+}
+
+void broadcast_to_users(userslist users, char *msg) {
+	box *temp = users->first;
+	while (temp != NULL) {
+		user_data *ud = (user_data *) temp->elem;
+		write(ud->socket, msg, 256); 
+		temp = temp->next;	
+	}
+}
+
+void men(list subs_rooms, char *msg) {
+	box *temp = subs_rooms->first;	
+	while (temp != NULL) {
+		broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, msg);
+		temp = temp->next;
+	}
 }
 
 //funcion usu
