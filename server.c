@@ -215,10 +215,10 @@ void sal(list l, int sock) {
       write(sock, "There are no rooms available\n", 50);
       return;
    }
+   write(sock, "---Lista de salas---",256);
    box *temp = l->first;
    while (temp != NULL) {
       write(sock, ((room *) temp->elem)->name, 10);
-      write(sock, "\n", 2);
       temp = temp->next;
    }
 
@@ -228,6 +228,7 @@ void sal(list l, int sock) {
 	//le imprime a ese usuario todos los usuarios conectados en el servidor
 void usu(list l, int sock) {
    box *temp = l->first;
+   write(sock, "---Lista de usuarios conectados el servidor---",256);
    while (temp != NULL) {
       box *temp2 = ((room *) temp->elem)->users->first;
       if (temp2 == NULL) {
@@ -235,8 +236,6 @@ void usu(list l, int sock) {
          continue;
       }
       char b[256];
-
-      
       while (temp2 != NULL) {
          int len = strlen(((char *) temp2->elem));
          bzero(b,256);
