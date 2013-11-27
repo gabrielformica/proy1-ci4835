@@ -6,7 +6,7 @@
 
 #define DEFAULT "actual"
 
-box *add_user(list l, char *roomname, char *username) {
+box *add_user(list l, char *roomname, void *username) {
 	if (roomname == NULL) {
 		perror("ERROR room name");
 		exit(1);
@@ -83,5 +83,20 @@ bool room_is_in(char *name, list l) {
 	return (temp != NULL);
 }
       
+user_data *create_user_data(char *name, int socket) {
+	user_data *ud;
+	if ((ud = malloc(sizeof(user_data))) == NULL) {
+		perror("ERROR malloc");	
+	}	
+	ud->name = name;	
+	ud->socket = socket;
+}
 
+box *get_room(list l, char *roomname) {
+	box *temp = l->first;
+	while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, roomname) != 0))
+		temp = temp->next;
 
+	return temp;
+
+}
