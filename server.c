@@ -239,8 +239,8 @@ void usu(list l, int sock) {
             b[i] = ((char *) temp2->elem)[i];
             
          b[len] = '\0';
-         write(sock, b, len+1);
-         write(sock, "\n\0", 3);
+         write(sock, b, 256);
+         write(sock, "\n", 256);
          temp2 = temp2->next;
       }
       temp = temp->next;

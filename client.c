@@ -86,12 +86,13 @@ int main(int argc, char *argv[]) {
       exit(1);
    }
 
-   while (1) {
+   while(1) {
       bzero(buffer,256);
-      charsno = recv(sockfd, buffer, 256, 0);
+      charsno = read(sockfd, buffer, 256);
       pthread_mutex_lock(&mutex);
       if (charsno < 0)
          error("Error reading from sockets");
+      int len = strlen(buffer);
       printf ("%s",buffer);
       pthread_mutex_unlock(&mutex);
    }
