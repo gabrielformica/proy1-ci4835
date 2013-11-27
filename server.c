@@ -14,12 +14,14 @@ void error();
 void sal();
 void usu();
 void cre();
+void subscribe();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
 
 list rooms;
+list users_connected;
 
 
 typedef struct thread_data thread_data;
@@ -68,9 +70,9 @@ int main(int argc, char *argv[]) {
       }
    }
 
-
-   rooms = initialize_rooms(defname);
-   add_room(rooms,"A");
+	rooms = initialize_rooms(defname);
+	users_connected = create_list();
+	add_room(rooms,"A");
 	
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
    if (sockfd < 0) 
@@ -124,22 +126,26 @@ void error(const char *msg) {
 }
 
 void subscribe(list subs_rooms, char *roomname) {
-   add(subs_rooms, get_room(rooms,roomname));
-   printf("Te acabas de subscribir a: -%s-\n",((room *)subs_rooms->first->next->elem)->name);
+
+	add(subs_rooms, get_room(rooms, roomname));
+	printf("Te acabas de subscribir a: -%s-\n", ((room *) ((box *)subs_rooms->first->next->elem)->elem)->name);
 }
 
 void *connection_handler(void *td) {
-   int sock = ((thread_data *) td)->client_sock;
-   list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
-   char aux[30];
-   char message[256];
-   memset(message, 0, 256);
+	int sock = ((thread_data *) td)->client_sock;
+	list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
+	char aux[30];
+	char message[256];
+	memset(message, 0, 256);
 
-   user_data *user = wait_username(rooms, sock);  //user points to the box of the user
-   printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
-   add(subscribed_rooms, rooms->first);	
-   int read_size;
-   while ((read_size = recv(sock, message, 256, 0)) > 0) {
+	user_data *user = wait_username(rooms, sock);  //user points to the box of the user
+	add(users_connected, user);
+	printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
+    add(subscribed_rooms, rooms->first);	
+	printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
+	int read_size;
+	while ((read_size = recv(sock, message, 256, 0)) > 0) {
+
 		
       pthread_mutex_lock(&mutex);
       if (read_size < 3) {
@@ -148,60 +154,49 @@ void *connection_handler(void *td) {
          printf("holaa\n");
          int i	= 0;	
          memset(aux, 0, 30);
-		
          while  (message[i+4] != '\n') {
             aux[i] = message[i+4];
             i++;
          }
-
          printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
-         //subscribe(subscribed_rooms, name);
-      }
-      else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
-			
-         //message = "Mandaste SAL";
-         sal(rooms, sock);
+			subscribe(subscribed_rooms, aux);
+		}
+		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
+           sal(sock);
       } 
       else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
-         //	message = "Mandaste MEN";
-         write(sock, message, strlen(client_message));	
-      }
-      else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
-         //	message = "Mandaste USU";
-         usu(rooms, sock);
-      }
-      else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
-         //	message = "Mandaste DES";
-         write(sock, message, strlen(client_message));	
-      }
-      else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
-         int i	= 0;	
-         memset(aux, 0, 30);
-		
-         while  (message[i+4] != '\n') {
-            aux[i] = message[i+4];
-            i++;
-         }
+		//	message = "Mandaste MEN";
+			write(sock, message, strlen(client_message));	
+		}
+		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
+           usu(sock); 
+		}
+		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
+		//	message = "Mandaste DES";
+			write(sock, message, strlen(client_message));	
+		}
+		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
+           int i	= 0;	
+           memset(aux, 0, 30);
+           while  (message[i+4] != '\n') {
+              aux[i] = message[i+4];
+              i++;
+           }
+           cre(sock,aux);
 
-         printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
-
-
-
-
-         write(sock, message, strlen(client_message));	
-      }
-      else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
-         //	message = "Mandaste ELI";
-         write(sock, message, strlen(client_message));	
-      }
-      else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
-         //		message = "Mandaste FUE";
-         write(sock, message, strlen(client_message));	
-      }
-      memset(message, 0, strlen(message));
-      pthread_mutex_unlock(&mutex);
-   }
-
+           
+		}
+		else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
+		//	message = "Mandaste ELI";
+			write(sock, message, strlen(client_message));	
+		}
+		else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
+	//		message = "Mandaste FUE";
+			write(sock, message, strlen(client_message));	
+		}
+		memset(message, 0, strlen(message));
+		pthread_mutex_unlock(&mutex);
+	}
 }
 
 
@@ -231,15 +226,17 @@ user_data *wait_username(list rooms, int socket) {
 }
 
 
-void sal(list l, int sock) {
-   if ((l == NULL) || (get_size(l) == 0)) {
-      write(sock, "There are no rooms available\n", 50);
-      return;
-   }
+void sal(int sock) {
+	
+  // if ((l == NULL) || (get_size(l) == 0)) {
+  //    write(sock, "There are no rooms available\n", 50);
+  //    return;
+  // }
    write(sock, "---Lista de salas---",256);
-   box *temp = l->first;
+   box *temp = rooms->first;
    while (temp != NULL) {
-      write(sock, ((room *) temp->elem)->name, 10);
+		printf("ESTAS SON LAS SALASSS : %s\n",((room *) temp->elem)->name);
+      write(sock, ((room *) temp->elem)->name, 256);
       temp = temp->next;
    }
 
@@ -247,36 +244,31 @@ void sal(list l, int sock) {
 
 //funcion usu
 //le imprime a ese usuario todos los usuarios conectados en el servidor
-void usu(list l, int sock) {
-   box *temp = l->first;
-   write(sock, "---Lista de usuarios conectados el servidor---",256);
-   while (temp != NULL) {
-      box *temp2 = ((room *) temp->elem)->users->first;
-      if (temp2 == NULL) {
-         temp = temp->next;
-         continue;
-      }
-      char b[256];
-      while (temp2 != NULL) {
-         int len = strlen(((char *) temp2->elem));
-         bzero(b,256);
-         int i;
-         for (i = 0; i < len; i++)
-            b[i] = ((char *) temp2->elem)[i];
-         write(sock, b, 256);
-         temp2 = temp2->next;
-      }
-      temp = temp->next;
-   }
+void usu(int sock) {
+	box *temp = users_connected->first;	
+	while (temp != NULL) {
+		write(sock, ((user_data *) temp->elem)->name, 256);
+		temp = temp->next;
+	}
 }
 
 
-void cre(int sock, char *new_room_name) {
-   print
+void cre(int sock, char *roomname) {
    box *temp;
-   if (box = add_room(l, new_room_name) == NULL)
-}
 
+   if ( temp  = get_room(rooms, roomname) != NULL  ) {
+      write(sock, "Room already exists", 256);
+      return;
+   }
+   temp = NULL;
+
+   if (temp = add_room(rooms, roomname) == NULL) {
+      write(sock, "Room already exists", 256);
+      return;
+   }
+   
+}
+ 
 
 
 
