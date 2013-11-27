@@ -13,6 +13,7 @@
 void error();
 void sal();
 void usu();
+void cre();
 void *connection_handler();
 box *wait_username();
 pthread_mutex_t mutex;
@@ -247,8 +248,17 @@ void usu(list l, int sock) {
       }
       temp = temp->next;
    }
-   
 }
+
+
+/* void cre(list l, int sock, char *new_room_name) { */
+/*    box *temp; */
+/*    if (box = add_room(l, new_room_name) == NULL) */
+/*       ; */
+   
+/* } */
+
+
 
 
 //funcion men $1
