@@ -92,8 +92,7 @@ int main(int argc, char *argv[]) {
       pthread_mutex_lock(&mutex);
       if (charsno < 0)
          error("Error reading from sockets");
-      int len = strlen(buffer);
-      printf ("%s",buffer);
+      printf ("%s\n",buffer);
       pthread_mutex_unlock(&mutex);
    }
 	

@@ -1,3 +1,4 @@
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,6 +90,9 @@ int main(int argc, char *argv[]) {
 	pthread_t thread_id;
 	pthread_mutex_init(&mutex,NULL);
 	while (client_sock = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
+       int flag = 1;
+       int result = setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY,
+                               (char *) &flag, sizeof(int));
 		printf("Connection accepted\n");
 		thread_data tdata = prepare_thread_data(client_sock, create_list());
 		
@@ -219,10 +223,10 @@ void sal(list l, int sock) {
       write(sock, "There are no rooms available\n", 50);
       return;
    }
+   write(sock, "---Lista de salas---",256);
    box *temp = l->first;
    while (temp != NULL) {
       write(sock, ((room *) temp->elem)->name, 10);
-      write(sock, "\n", 2);
       temp = temp->next;
    }
 
@@ -232,22 +236,21 @@ void sal(list l, int sock) {
 	//le imprime a ese usuario todos los usuarios conectados en el servidor
 void usu(list l, int sock) {
    box *temp = l->first;
+   write(sock, "---Lista de usuarios conectados el servidor---",256);
    while (temp != NULL) {
       box *temp2 = ((room *) temp->elem)->users->first;
       if (temp2 == NULL) {
          temp = temp->next;
          continue;
       }
+      char b[256];
       while (temp2 != NULL) {
          int len = strlen(((char *) temp2->elem));
-         char *b = malloc(sizeof(char)*(len+1));
+         bzero(b,256);
          int i;
          for (i = 0; i < len; i++)
             b[i] = ((char *) temp2->elem)[i];
-            
-         b[len] = '\0';
          write(sock, b, 256);
-         write(sock, "\n", 256);
          temp2 = temp2->next;
       }
       temp = temp->next;
