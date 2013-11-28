@@ -6,6 +6,11 @@
 
 #define DEFAULT "actual"
 
+bool del_user(list l, char *roomname, void *user) {
+	box *temp = get_room(l, roomname);
+	return del(((room *) temp->elem)->users, user);
+}
+
 box *add_user(list l, char *roomname, void *username) {
 	if (roomname == NULL) {
 		perror("ERROR room name");

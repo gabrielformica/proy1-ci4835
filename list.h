@@ -54,7 +54,7 @@ extern box *add(list,void *);
   * @return El primer elemento de la cola, o null si es vacia
   */
 
-extern void *del_elem(list,void *);
+extern bool del(list,void *);
 
 /**
   * Devuelve el tamanio de la cola.
@@ -63,4 +63,5 @@ extern void *del_elem(list,void *);
   */
 
 extern int get_size(list);
+
 #endif
