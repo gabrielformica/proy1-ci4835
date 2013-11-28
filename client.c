@@ -14,9 +14,9 @@ void error();
 void mfree();
 void *reading_stdin();
 pthread_mutex_t mutex;
-char *username;
+char *username, *comfile;
 bool cfile = false;
-char *comfile;
+bool quit_request = false;
 
 int main(int argc, char *argv[]) {
        
@@ -25,7 +25,6 @@ int main(int argc, char *argv[]) {
    char opts, *host, buffer[256];
    struct sockaddr_in serv_addr;	
    struct hostent *server;
-
         
    while ((opts = getopt(argc, argv, ":h:p:n:a:")) != -1) {
       switch (opts) {
@@ -103,8 +102,11 @@ int main(int argc, char *argv[]) {
          close(sockfd);
          mfree(host);
          mfree(comfile);
-         mfree(username);
-         exit(0);
+         //         mfree(username);
+         quit_request = true;
+         pthread_join(pthread_id, NULL);
+         printf ("Romp\n");
+         break;
       }
       
       if (strcmp(buffer, "~~end") == 0)
@@ -120,6 +122,7 @@ int main(int argc, char *argv[]) {
      free(comfile); 
      free(username);
    */
+   free(username);
 }
 
 void error(char *msg) {
@@ -135,7 +138,8 @@ void *reading_stdin(void *sockfd) {
    char * line;
    size_t len = 0;
    ssize_t read;
-   
+
+   bzero(message,256);
    write(sock, username, strlen(username));
    if (cfile) {
       fp = fopen(comfile, "r");
@@ -144,24 +148,24 @@ void *reading_stdin(void *sockfd) {
       }
       
       while ((read = getline(&line, &len, fp)) != -1) {
-         /* line[read-1] = 0; */
          pthread_mutex_lock(&mutex);
          write(sock, line, 256);
          pthread_mutex_unlock(&mutex);
-         /* printf ("Line of size: %d\n", read); */
-         /* printf ("Line: -%s- \n", line); */
       }
-      if (line)
-         free(line);
+      mfree(line);
+      fclose(fp);
    }
       
-   while(1) {
+   while(!quit_request) {
       fgets(message,256,stdin);
       pthread_mutex_lock(&mutex);
       write(sock,message,256);
       bzero(message,256);
       pthread_mutex_unlock(&mutex);
    }
+   printf ("EL BEBO\n");
+
+   return;
 }
 
 void mfree(void * p) {

@@ -18,6 +18,7 @@ void subscribe();
 void men();
 void des();
 void sus();
+void fue();
 void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
@@ -75,10 +76,10 @@ int main(int argc, char *argv[]) {
       }
    }
 
-	rooms = initialize_rooms(defname);
-	users_connected = create_list();
-	add_room(rooms,"A");
-	
+   rooms = initialize_rooms(defname);
+   users_connected = create_list();
+   add_room(rooms,"A");
+    
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
    if (sockfd < 0) 
       error("ERROR opening socket");
@@ -117,19 +118,19 @@ int main(int argc, char *argv[]) {
 }
 
 void *connection_handler(void *td) {
-	int sock = ((thread_data *) td)->client_sock;
-	list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
-	char aux[30];
-	char message[256];
-	memset(message, 0, 256);
+   int sock = ((thread_data *) td)->client_sock;
+   list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
+   char aux[30];
+   char message[256];
+   memset(message, 0, 256);
 
-	user_data *user = wait_username(rooms, sock);  //user points to the box of the user
-	add(users_connected, user);
-	printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
+   user_data *user = wait_username(rooms, sock);  //user points to the box of the user
+   add(users_connected, user);
+   printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
    add(subscribed_rooms, rooms->first);	
-	printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
-	int read_size;
-	while ((read_size = recv(sock, message, 256, 0)) > 0) {
+   printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
+   int read_size;
+   while ((read_size = recv(sock, message, 256, 0)) > 0) {
       pthread_mutex_lock(&mutex);
       if (read_size < 3) {
       }
@@ -142,48 +143,46 @@ void *connection_handler(void *td) {
             i++;
          }
          printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
-			sus(subscribed_rooms, aux, user);
-		}
-		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
-           sal(sock);
+         sus(subscribed_rooms, aux, user);
+      }
+      else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
+         sal(sock);
       } 
       else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
-			int i	= 0;	
-			memset(aux, 0, 30);
-			while  (message[i+4] != '\n') {
-				aux[i] = message[i+4];
-				i++;
-			}
-			men(user, subscribed_rooms, aux);
-		}
-		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
-           usu(sock); 
-		}
-		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
-			des(subscribed_rooms, user);
-		}
-		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
-           int i	= 0;	
-           memset(aux, 0, 30);
-           while  (message[i+4] != '\n') {
-              aux[i] = message[i+4];
-              i++;
-           }
-           cre(sock,aux);
-		}
-		else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
-		//	message = "Mandaste ELI";
-			write(sock, message, strlen(client_message));	
-		}
-		else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
-           fue(sock);
-		}
-		memset(message, 0, strlen(message));
-		pthread_mutex_unlock(&mutex);
-	}
+         int i	= 0;	
+         memset(aux, 0, 30);
+         while  (message[i+4] != '\n') {
+            aux[i] = message[i+4];
+            i++;
+         }
+         men(user, subscribed_rooms, aux);
+      }
+      else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
+         usu(sock); 
+      }
+      else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
+         des(subscribed_rooms, user);
+      }
+      else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
+         int i	= 0;	
+         memset(aux, 0, 30);
+         while  (message[i+4] != '\n') {
+            aux[i] = message[i+4];
+            i++;
+         }
+         cre(sock,aux);
+      }
+      else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
+         //	message = "Mandaste ELI";
+         write(sock, message, strlen(client_message));	
+      }
+      else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
+         fue(sock, subscribed_rooms, user);
+      }
+      memset(message, 0, strlen(message));
+      pthread_mutex_unlock(&mutex);
+   }
 }
-
-void execute();
 
 thread_data prepare_thread_data(int client_sock, list l) {
    thread_data temp; 
@@ -198,17 +197,17 @@ void error(const char *msg) {
 }
 
 void sus(list subs_rooms, char *roomname, user_data *ud) {
-	add_user(rooms, roomname, ud);
-	add(subs_rooms, get_room(rooms, roomname));
+   add_user(rooms, roomname, ud);
+   add(subs_rooms, get_room(rooms, roomname));
 }
 
 void des(list subs_rooms, user_data *ud) {
-	box *temp = rooms->first;
-	while (temp != NULL) {	
-		del_user(rooms, ((room *) temp->elem)->name, ud);
-		temp = temp->next;
-	}
-	destroy(subs_rooms);
+   box *temp = rooms->first;
+   while (temp != NULL) {	
+      del_user(rooms, ((room *) temp->elem)->name, ud);
+      temp = temp->next;
+   }
+   destroy(subs_rooms);
 }
 
 user_data *wait_username(list rooms, int socket) {
@@ -239,14 +238,14 @@ user_data *wait_username(list rooms, int socket) {
 
 void sal(int sock) {
 	
-  // if ((l == NULL) || (get_size(l) == 0)) {
-  //    write(sock, "There are no rooms available\n", 50);
-  //    return;
-  // }
+   // if ((l == NULL) || (get_size(l) == 0)) {
+   //    write(sock, "There are no rooms available\n", 50);
+   //    return;
+   // }
    write(sock, "---Lista de salas---",256);
    box *temp = rooms->first;
    while (temp != NULL) {
-		printf("ESTAS SON LAS SALASSS : %s\n",((room *) temp->elem)->name);
+      printf("ESTAS SON LAS SALASSS : %s\n",((room *) temp->elem)->name);
       write(sock, ((room *) temp->elem)->name, 256);
       temp = temp->next;
    }
@@ -254,41 +253,41 @@ void sal(int sock) {
 }
 
 void broadcast_to_users(userslist users, char *msg) {
-	box *temp = users->first;
-	while (temp != NULL) {
-		user_data *ud = (user_data *) temp->elem;
-		write(ud->socket, msg, 256); 
-		temp = temp->next;	
-	}
+   box *temp = users->first;
+   while (temp != NULL) {
+      user_data *ud = (user_data *) temp->elem;
+      write(ud->socket, msg, 256); 
+      temp = temp->next;	
+   }
 }
 
 void men(user_data *user, list subs_rooms, char *msg) {
-	char *buffer = malloc(sizeof(char)*256);
-	box *temp = subs_rooms->first;	
-	while (temp != NULL) {
-		memset(buffer, 0, 256);
-		int i;
-		strcpy(buffer, user->name);
-		strcat(buffer, " (from room \'");	
-		strcat(buffer, ((room *) ((box *) temp->elem)->elem)->name);
-		strcat(buffer, "\') says: ");
-		strcat(buffer, msg);
+   char *buffer = malloc(sizeof(char)*256);
+   box *temp = subs_rooms->first;	
+   while (temp != NULL) {
+      memset(buffer, 0, 256);
+      int i;
+      strcpy(buffer, user->name);
+      strcat(buffer, " (from room \'");	
+      strcat(buffer, ((room *) ((box *) temp->elem)->elem)->name);
+      strcat(buffer, "\') says: ");
+      strcat(buffer, msg);
 		
-		broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, buffer);
-		temp = temp->next;
-	}
-	free(buffer);
+      broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, buffer);
+      temp = temp->next;
+   }
+   free(buffer);
 }
 
 //funcion usu
 //le imprime a ese usuario todos los usuarios conectados en el servidor
 
 void usu(int sock) {
-	box *temp = users_connected->first;	
-	while (temp != NULL) {
-		write(sock, ((user_data *) temp->elem)->name, 256);
-		temp = temp->next;
-	}
+   box *temp = users_connected->first;	
+   while (temp != NULL) {
+      write(sock, ((user_data *) temp->elem)->name, 256);
+      temp = temp->next;
+   }
 }
 
 void cre(int sock, char *roomname) {
@@ -308,7 +307,8 @@ void cre(int sock, char *roomname) {
 }
  
 
-void fue(int sock) {
-   write(sock, "See you later!", 256);
+void fue(int sock, list sub_rooms, user_data *ud) {
+   des(sub_rooms, ud);
+   write(sock, "See you later", 256);
    close(sock);
 }
