@@ -5,8 +5,7 @@
   *
   * @section Descripcion
   *
-  * Programa que imprime por niveles de izquierda a derecha los nodos
-  * de un arbol binario completamente especificado
+  * Generic structure of simple linked list 
   */
 
 #ifndef LIST_H 
@@ -29,39 +28,46 @@ struct head {
 
 typedef struct head *list;
 
-
 /**
-  * Crea una cola vacia.
-  * @param c Cola a crear.
-  * @return La cola es una cola valida.
+  * Create an empty list
+  * @param None.
+  * @return Empty list
   */
 
 extern list create_list();
 
-
 /**
-  * Anade un elemento al final de cola. 
-  * @param c Cola en question.
-  * @param n Elemento que se desea agregar.
-  * @return La cola c, y c es una cola valida.
+  * Add an element to end of the list
+  * @param l: the list
+  * @param elem: the element it is desired to add
+  * @return The pointer to the added element
   */
 
 extern box *add(list,void *);
 
 /**
-  * Desencola un elemento de la cola.
-  * @param c Cola en question. La cola es una cola valida.
-  * @return El primer elemento de la cola, o null si es vacia
+  * Get the amount of elements in the list
+  * @param The list. It is a valid list
+  * @return The amount of elements in the list
+  */
+
+extern int get_size(list);
+
+/**
+  * Delete an element of the list
+  * @param The list. It is a valid list
+  * @return True if the element is deleted. False in any other case
   */
 
 extern bool del(list,void *);
 
 /**
-  * Devuelve el tamanio de la cola.
-  * @param c Cola en question. La cola es una cola valida.
-  * @return Tamanio de la cola.
+  * Destroy the list. 
+  * @param l: The list. It is a valid list
+  * @return Anything, but the list is initialized
   */
 
-extern int get_size(list);
+
+extern void destroy(list);
 
 #endif

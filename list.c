@@ -5,8 +5,7 @@
   *
   * @section Descripcion
   *
-  * Programa que imprime por niveles de izquierda a derecha los nodos
-  * de un arbol binario completamente especificado
+  * Generic structure of simple linked list 
   */
 
 #include <stdio.h>
@@ -15,9 +14,9 @@
 
 
 /**
-  * Crea una cola vacia.
-  * @param c Cola a crear.
-  * @return La cola es una cola valida.
+  * Create an empty list
+  * @param None.
+  * @return Empty list
   */
 
 list create_list() {
@@ -33,39 +32,40 @@ list create_list() {
 }
 
 /**
- * Anade un elemento al final de cola. 
- * @param c Cola en question.
- * @param n Elemento que se desea agregar.
- * @return La cola c, y c es una cola valida.
- */
+  * Add an element to end of the list
+  * @param l: the list
+  * @param elem: the element it is desired to add
+  * @return The pointer to the added element
+  */
 
-box *add(list c, void *n) {
+box *add(list l, void *elem) {
 	box *temp;
 
 	if ((temp = (box *) malloc(sizeof(box))) == NULL) {
+		perror("ERROR malloc");
 		return NULL;
 	}
-	temp->elem = n;
+	temp->elem = elem;
 	temp->next = NULL;
-	if (c->size == 0) {
-		c->first = temp;	
-		++(c->size);
-		c->last= temp;
+	if (l->size == 0) {
+		l->first = temp;	
+		++(l->size);
+		l->last= temp;
 	}
 	else {
-		(c->last)->next = temp;
-		c->last = temp;
-		++(c->size);
+		(l->last)->next = temp;
+		l->last = temp;
+		++(l->size);
 	}
 	return temp;
 }
 
 /**
-  * Desencola un elemento de la cola.
-  * @param c Cola en question. La cola es una cola valida.
-  * @return El primer elemento de la cola, o null si es vacia
+  * Delete an element of the list
+  * @param l: The list. It is a valid list
+  * @param elem: the element it is desired to delete 
+  * @return True if the element is deleted. False in any other case
   */
-
 
 bool del(list l, void *elem) {
 	box *temp = l->first;
@@ -95,35 +95,23 @@ bool del(list l, void *elem) {
 		temp = temp->next;	
 	}
 	return false;
-/*
-	if (c->size == 0) 
-		return NULL;
-	else {
-	        void *n;  
-		box *temp;
-		n = (c->first)->elem;
-		temp = c->first;  //Para no perder la direccion
-		c->first = (c->first)->next;
-		if (c->size == 1) { 
-			c->first = NULL;
-			c->last = NULL;
-		}
-		--(c->size);
-		free(temp); //Se libera el espacio
-	        return n;
-	}
-*/
 }
 
 /**
-  * Devuelve el tamanio de la cola.
-  * @param c Cola en question. La cola es una cola valida.
-  * @return Tamanio de la cola.
+  * Get the amount of elements in the list
+  * @param l: The list. It is a valid list
+  * @return The amount of elements in the list
   */
 
-int get_size(list c) {
-	return c->size;
+int get_size(list l) {
+	return l->size;
 }
+
+/**
+  * Destroy the list. 
+  * @param l: The list. It is a valid list
+  * @return Anything, but the list is initialized
+  */
 
 void destroy(list l) {
 	box *temp = l->first;
@@ -134,6 +122,7 @@ void destroy(list l) {
 		free(temp);
 		temp = temp2;
 	}	
+
 	l->first = NULL;
 	l->last = NULL;
 	l->size = 0;

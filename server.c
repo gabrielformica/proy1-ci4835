@@ -237,11 +237,6 @@ user_data *wait_username(list rooms, int socket) {
 
 
 void sal(int sock) {
-	
-   // if ((l == NULL) || (get_size(l) == 0)) {
-   //    write(sock, "There are no rooms available\n", 50);
-   //    return;
-   // }
    write(sock, "---Lista de salas---",256);
    box *temp = rooms->first;
    while (temp != NULL) {
@@ -249,7 +244,6 @@ void sal(int sock) {
       write(sock, ((room *) temp->elem)->name, 256);
       temp = temp->next;
    }
-
 }
 
 void broadcast_to_users(userslist users, char *msg) {
@@ -279,9 +273,6 @@ void men(user_data *user, list subs_rooms, char *msg) {
    free(buffer);
 }
 
-//funcion usu
-//le imprime a ese usuario todos los usuarios conectados en el servidor
-
 void usu(int sock) {
    box *temp = users_connected->first;	
    while (temp != NULL) {
@@ -305,7 +296,7 @@ void cre(int sock, char *roomname) {
    }
    
 }
- 
+
 
 void fue(int sock, list sub_rooms, user_data *ud) {
    des(sub_rooms, ud);
