@@ -66,16 +66,19 @@ box *add(list c, void *n) {
   * @return El primer elemento de la cola, o null si es vacia
   */
 
+
 bool del(list l, void *elem) {
 	box *temp = l->first;
 	if ((temp != NULL) && (temp->elem == elem)) {
-		l->first = l->first->next;
-		free(temp);
 		if (l->size == 1) {
 			l->first = NULL;
 			l->last = NULL;
 		}
-		(l->size)--;
+		else {
+			l->first = l->first->next;
+		}
+		free(temp);
+		l->size = l->size -1;
 		return true;
 	}
 	while ((temp != NULL) && (temp->next != NULL)) {
@@ -120,4 +123,19 @@ bool del(list l, void *elem) {
 
 int get_size(list c) {
 	return c->size;
+}
+
+void destroy(list l) {
+	box *temp = l->first;
+	if (temp == NULL) 
+		return;
+	while (temp->next != NULL) {
+		box *temp2 = temp->next;
+		free(temp);
+		temp = temp2;
+	}	
+	l->first = NULL;
+	l->last = NULL;
+	l->size = 0;
+	free(temp);
 }

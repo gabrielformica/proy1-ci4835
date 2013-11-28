@@ -165,7 +165,6 @@ void *connection_handler(void *td) {
            usu(sock); 
 		}
 		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
-		//	message = "Mandaste DES";
 			des(subscribed_rooms, user);
 		}
 		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
@@ -208,15 +207,15 @@ void error(const char *msg) {
 void sus(list subs_rooms, char *roomname, user_data *ud) {
 	add_user(rooms, roomname, ud);
 	add(subs_rooms, get_room(rooms, roomname));
-	printf("Te acabas de subscribir a: -%s-\n", ((room *) ((box *)subs_rooms->first->next->elem)->elem)->name);
 }
 
 void des(list subs_rooms, user_data *ud) {
 	box *temp = rooms->first;
 	while (temp != NULL) {	
 		del_user(rooms, ((room *) temp->elem)->name, ud);
-		del(subs_rooms, get_room(rooms, ((room *) temp->elem)->name));
+		temp = temp->next;
 	}
+	destroy(subs_rooms);
 }
 
 user_data *wait_username(list rooms, int socket) {
