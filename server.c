@@ -183,8 +183,7 @@ void *connection_handler(void *td) {
 			write(sock, message, strlen(client_message));	
 		}
 		else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
-	//		message = "Mandaste FUE";
-			write(sock, message, strlen(client_message));	
+           fue(sock);
 		}
 		memset(message, 0, strlen(message));
 		pthread_mutex_unlock(&mutex);
@@ -315,11 +314,7 @@ void cre(int sock, char *roomname) {
 }
  
 
+void fue(int sock) {
+   write(sock, "Hasta luego", 256);
 
-
-//funcion men $1
-//
-
-
-//funcion sus
-
+}
