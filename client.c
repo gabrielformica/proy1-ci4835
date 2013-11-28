@@ -8,18 +8,20 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 #include <pthread.h>
+#include <stdbool.h>
 
 void error();
 void *reading_stdin();
 pthread_mutex_t mutex;
 char *username;
-
+bool cfile = false;
+char *comfile;
 
 int main(int argc, char *argv[]) {
        
 
    int sockfd, portno, charsno;
-   char opts, *host, *comfile, buffer[256];
+   char opts, *host, buffer[256];
    struct sockaddr_in serv_addr;	
    struct hostent *server;
 
@@ -55,6 +57,7 @@ int main(int argc, char *argv[]) {
          }
          comfile = optarg;
          printf("Flag -a, with paremeter %s\n",comfile);
+         cfile = true;
          break;
       case '?':
          printf("ERROR with flags\n");
@@ -73,6 +76,8 @@ int main(int argc, char *argv[]) {
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
    serv_addr.sin_port = htons(portno);
+
+   /* Se hace la conexion */
    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
       error("ERROR connecting");
    }
@@ -80,6 +85,7 @@ int main(int argc, char *argv[]) {
 
    /* se inicia el mutex */
    pthread_mutex_init(&mutex,NULL);
+
    pthread_t pthread_id;
    if (pthread_create(&pthread_id, NULL, reading_stdin, (void *)&sockfd)) {
       perror("Could not create thread");
@@ -111,18 +117,39 @@ void error(char *msg) {
 }
 
 
-
 void *reading_stdin(void *sockfd) {
    int sock = *(int *) sockfd;
    char message[256];
-
-	write(sock, username, strlen(username));
+   FILE * fp;
+   char * line;
+   size_t len = 0;
+   ssize_t read;
+   
+   write(sock, username, strlen(username));
+   if (cfile) {
+      fp = fopen(comfile, "r");
+      if ( fp  == NULL ) {
+         perror("Error opening file");
+      }
+      
+      while ((read = getline(&line, &len, fp)) != -1) {
+         /* line[read-1] = 0; */
+         pthread_mutex_lock(&mutex);
+         write(sock, line, 256);
+         pthread_mutex_unlock(&mutex);
+         /* printf ("Line of size: %d\n", read); */
+         /* printf ("Line: -%s- \n", line); */
+      }
+      if (line)
+         free(line);
+   }
+      
    while(1) {
       fgets(message,256,stdin);
       pthread_mutex_lock(&mutex);
       write(sock,message,256);
       bzero(message,256);
       pthread_mutex_unlock(&mutex);
-      
    }
 }
+

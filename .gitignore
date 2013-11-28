@@ -9,3 +9,4 @@ server
 !.gitignore
 testmain
 capture.lo
+*.txt
