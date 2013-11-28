@@ -24,7 +24,8 @@ user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
 
-list rooms;
+
+list rooms;   
 list users_connected;
 
 
@@ -115,10 +116,6 @@ int main(int argc, char *argv[]) {
    return 0; 
 }
 
-
-
-
-
 void *connection_handler(void *td) {
 	int sock = ((thread_data *) td)->client_sock;
 	list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
@@ -133,8 +130,6 @@ void *connection_handler(void *td) {
 	printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
 	int read_size;
 	while ((read_size = recv(sock, message, 256, 0)) > 0) {
-
-		
       pthread_mutex_lock(&mutex);
       if (read_size < 3) {
       }
@@ -175,8 +170,6 @@ void *connection_handler(void *td) {
               i++;
            }
            cre(sock,aux);
-
-           
 		}
 		else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
 		//	message = "Mandaste ELI";
@@ -190,6 +183,7 @@ void *connection_handler(void *td) {
 	}
 }
 
+void execute();
 
 thread_data prepare_thread_data(int client_sock, list l) {
    thread_data temp; 
