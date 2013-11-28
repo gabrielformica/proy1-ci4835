@@ -16,6 +16,8 @@ void usu();
 void cre();
 void subscribe();
 void men();
+void des();
+void sus();
 void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
@@ -115,23 +117,7 @@ int main(int argc, char *argv[]) {
 
 
 
-thread_data prepare_thread_data(int client_sock, list l) {
-   thread_data temp; 
-   temp.client_sock = client_sock;
-   temp.subscribed_rooms = l;
-   return temp;
-}
 
-void error(const char *msg) {
-   perror(msg);
-   exit(1);
-}
-
-void subscribe(list subs_rooms, char *roomname) {
-
-	add(subs_rooms, get_room(rooms, roomname));
-	printf("Te acabas de subscribir a: -%s-\n", ((room *) ((box *)subs_rooms->first->next->elem)->elem)->name);
-}
 
 void *connection_handler(void *td) {
 	int sock = ((thread_data *) td)->client_sock;
@@ -143,7 +129,7 @@ void *connection_handler(void *td) {
 	user_data *user = wait_username(rooms, sock);  //user points to the box of the user
 	add(users_connected, user);
 	printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
-    add(subscribed_rooms, rooms->first);	
+   add(subscribed_rooms, rooms->first);	
 	printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
 	int read_size;
 	while ((read_size = recv(sock, message, 256, 0)) > 0) {
@@ -161,7 +147,7 @@ void *connection_handler(void *td) {
             i++;
          }
          printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
-			subscribe(subscribed_rooms, aux);
+			sus(subscribed_rooms, aux, user);
 		}
 		else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
            sal(sock);
@@ -173,14 +159,14 @@ void *connection_handler(void *td) {
 				aux[i] = message[i+4];
 				i++;
 			}
-			men(subscribed_rooms, aux);
+			men(user, subscribed_rooms, aux);
 		}
 		else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
            usu(sock); 
 		}
 		else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
 		//	message = "Mandaste DES";
-			write(sock, message, strlen(client_message));	
+			des(subscribed_rooms, user);
 		}
 		else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
            int i	= 0;	
@@ -206,6 +192,32 @@ void *connection_handler(void *td) {
 	}
 }
 
+
+thread_data prepare_thread_data(int client_sock, list l) {
+   thread_data temp; 
+   temp.client_sock = client_sock;
+   temp.subscribed_rooms = l;
+   return temp;
+}
+
+void error(const char *msg) {
+   perror(msg);
+   exit(1);
+}
+
+void sus(list subs_rooms, char *roomname, user_data *ud) {
+	add_user(rooms, roomname, ud);
+	add(subs_rooms, get_room(rooms, roomname));
+	printf("Te acabas de subscribir a: -%s-\n", ((room *) ((box *)subs_rooms->first->next->elem)->elem)->name);
+}
+
+void des(list subs_rooms, user_data *ud) {
+	box *temp = rooms->first;
+	while (temp != NULL) {	
+		del_user(rooms, ((room *) temp->elem)->name, ud);
+		del(subs_rooms, get_room(rooms, ((room *) temp->elem)->name));
+	}
+}
 
 user_data *wait_username(list rooms, int socket) {
    user_data *ud = NULL;
@@ -258,12 +270,22 @@ void broadcast_to_users(userslist users, char *msg) {
 	}
 }
 
-void men(list subs_rooms, char *msg) {
+void men(user_data *user, list subs_rooms, char *msg) {
+	char *buffer = malloc(sizeof(char)*256);
 	box *temp = subs_rooms->first;	
 	while (temp != NULL) {
-		broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, msg);
+		memset(buffer, 0, 256);
+		int i;
+		strcpy(buffer, user->name);
+		strcat(buffer, " (from room \'");	
+		strcat(buffer, ((room *) ((box *) temp->elem)->elem)->name);
+		strcat(buffer, "\') says: ");
+		strcat(buffer, msg);
+		
+		broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, buffer);
 		temp = temp->next;
 	}
+	free(buffer);
 }
 
 //funcion usu
@@ -280,13 +302,13 @@ void usu(int sock) {
 void cre(int sock, char *roomname) {
    box *temp;
 
-   if ( temp  = get_room(rooms, roomname) != NULL  ) {
+   if ((temp  = get_room(rooms, roomname)) != NULL) {
       write(sock, "Room already exists", 256);
       return;
    }
    temp = NULL;
 
-   if (temp = add_room(rooms, roomname) == NULL) {
+   if ((temp = add_room(rooms, roomname)) == NULL) {
       write(sock, "Room already exists", 256);
       return;
    }

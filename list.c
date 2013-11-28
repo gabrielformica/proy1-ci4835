@@ -66,8 +66,32 @@ box *add(list c, void *n) {
   * @return El primer elemento de la cola, o null si es vacia
   */
 
-void *del_elem(list c, void *elem) {
-	return NULL;
+bool del(list l, void *elem) {
+	box *temp = l->first;
+	if ((temp != NULL) && (temp->elem == elem)) {
+		l->first = l->first->next;
+		free(temp);
+		if (l->size == 1) {
+			l->first = NULL;
+			l->last = NULL;
+		}
+		(l->size)--;
+		return true;
+	}
+	while ((temp != NULL) && (temp->next != NULL)) {
+		if (temp->next->elem == elem)	{
+			box *temp2 = temp->next;
+			if (l->last == temp2) {
+				l->last = temp; 
+			}
+			temp->next = temp->next->next;
+			free(temp2);
+			(l->size)--;
+			return true;
+		}			
+		temp = temp->next;	
+	}
+	return false;
 /*
 	if (c->size == 0) 
 		return NULL;
@@ -94,6 +118,6 @@ void *del_elem(list c, void *elem) {
   * @return Tamanio de la cola.
   */
 
-int get_size(list c){
+int get_size(list c) {
 	return c->size;
 }
