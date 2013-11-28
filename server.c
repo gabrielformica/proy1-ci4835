@@ -289,6 +289,7 @@ void men(user_data *user, list subs_rooms, char *msg) {
 
 //funcion usu
 //le imprime a ese usuario todos los usuarios conectados en el servidor
+
 void usu(int sock) {
 	box *temp = users_connected->first;	
 	while (temp != NULL) {
@@ -296,7 +297,6 @@ void usu(int sock) {
 		temp = temp->next;
 	}
 }
-
 
 void cre(int sock, char *roomname) {
    box *temp;
