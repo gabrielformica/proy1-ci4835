@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 void error();
+void mfree();
 void *reading_stdin();
 pthread_mutex_t mutex;
 char *username;
@@ -94,10 +95,20 @@ int main(int argc, char *argv[]) {
 
    while(1) {
       bzero(buffer,256);
-      charsno = read(sockfd, buffer, 256);
+      charsno = recv(sockfd, buffer, 256,0);
       pthread_mutex_lock(&mutex);
-      if (charsno < 0)
+      if (charsno < 0) {
          error("Error reading from sockets");
+      } else if (charsno == 0) {
+         close(sockfd);
+         mfree(host);
+         mfree(comfile);
+         mfree(username);
+         exit(0);
+      }
+      
+      if (strcmp(buffer, "~~end") == 0)
+         exit(0);
       printf ("%s\n",buffer);
       pthread_mutex_unlock(&mutex);
    }
@@ -153,3 +164,7 @@ void *reading_stdin(void *sockfd) {
    }
 }
 
+void mfree(void * p) {
+   if (p)
+      free;
+}

@@ -309,6 +309,6 @@ void cre(int sock, char *roomname) {
  
 
 void fue(int sock) {
-   write(sock, "Hasta luego", 256);
-
+   write(sock, "See you later!", 256);
+   close(sock);
 }
