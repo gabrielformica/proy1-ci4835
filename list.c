@@ -34,17 +34,18 @@ list create_list() {
 /**
   * Add an element to end of the list
   * @param l: the list
-  * @param n: Element that is going to be added
-  * @return the list, and it is a valid list
+  * @param elem: the element it is desired to add
+  * @return The pointer to the added element
   */
 
-box *add(list l, void *n) {
+box *add(list l, void *elem) {
 	box *temp;
 
 	if ((temp = (box *) malloc(sizeof(box))) == NULL) {
+		perror("ERROR malloc");
 		return NULL;
 	}
-	temp->elem = n;
+	temp->elem = elem;
 	temp->next = NULL;
 	if (l->size == 0) {
 		l->first = temp;	
@@ -61,10 +62,10 @@ box *add(list l, void *n) {
 
 /**
   * Delete an element of the list
-  * @param The list. It is a valid list
-  * @return true if the element is deleted, false in other case
+  * @param l: The list. It is a valid list
+  * @param elem: the element it is desired to delete 
+  * @return True if the element is deleted. False in any other case
   */
-
 
 bool del(list l, void *elem) {
 	box *temp = l->first;
@@ -98,13 +99,19 @@ bool del(list l, void *elem) {
 
 /**
   * Get the amount of elements in the list
-  * @param The list. It is a valid list
-  * @return the amount of elements in the list
+  * @param l: The list. It is a valid list
+  * @return The amount of elements in the list
   */
 
-int get_size(list c) {
-	return c->size;
+int get_size(list l) {
+	return l->size;
 }
+
+/**
+  * Destroy the list. 
+  * @param l: The list. It is a valid list
+  * @return Anything, but the list is initialized
+  */
 
 void destroy(list l) {
 	box *temp = l->first;
@@ -115,6 +122,7 @@ void destroy(list l) {
 		free(temp);
 		temp = temp2;
 	}	
+
 	l->first = NULL;
 	l->last = NULL;
 	l->size = 0;
