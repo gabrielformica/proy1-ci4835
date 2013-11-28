@@ -102,15 +102,15 @@ int main(int argc, char *argv[]) {
          close(sockfd);
          mfree(host);
          mfree(comfile);
-         //         mfree(username);
+         mfree(username);
          quit_request = true;
-         pthread_join(pthread_id, NULL);
-         printf ("Romp\n");
-         break;
+         /* printf ("Esperando join...\n"); */
+         /* pthread_join(pthread_id, NULL); */
+         /* printf ("Romp\n"); */
+
+         exit(0);
       }
       
-      if (strcmp(buffer, "~~end") == 0)
-         exit(0);
       printf ("%s\n",buffer);
       pthread_mutex_unlock(&mutex);
    }
@@ -165,7 +165,7 @@ void *reading_stdin(void *sockfd) {
    }
    printf ("EL BEBO\n");
 
-   return;
+   pthread_exit(0);
 }
 
 void mfree(void * p) {

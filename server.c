@@ -299,7 +299,10 @@ void cre(int sock, char *roomname) {
 
 
 void fue(int sock, list sub_rooms, user_data *ud) {
+   box *temp = users_connected->first;
    des(sub_rooms, ud);
+   del(users_connected,ud);
    write(sock, "See you later", 256);
    close(sock);
+   return;      
 }
