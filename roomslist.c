@@ -3,7 +3,6 @@
 #include <string.h>
 #include "list.h"
 #include "roomslist.h"
-
 #define DEFAULT "actual"
 
 

@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include "list.h"
 #include "roomslist.h"
+#define DEFAULT "actual"
 
 void error();
 void sal();
@@ -18,23 +19,21 @@ void subscribe();
 void men();
 void des();
 void sus();
+void fue();
 void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
 
-
 list rooms;   
 list users_connected;
-
 
 typedef struct thread_data thread_data;
 struct thread_data {
    int client_sock;
    list subscribed_rooms; 
 };
-
 thread_data prepare_thread_data();
 
 int main(int argc, char *argv[]) {
@@ -47,9 +46,8 @@ int main(int argc, char *argv[]) {
    char *defname = NULL;
    struct sockaddr_in serv_addr, cli_addr;
    int n;
-	
 
-   if (argc < 5) {
+   if (argc < 3) {
       fprintf(stderr,"ERROR, wrong number of arguments.\n");
       exit(1);
    } 
@@ -74,6 +72,14 @@ int main(int argc, char *argv[]) {
          break;
       }
    }
+
+	if (defname == NULL) {
+		if ((defname = (char *) malloc(sizeof(char)*strlen(optarg))) == NULL) {
+			perror("Error malloc");
+			exit(1);	
+		}
+		defname = DEFAULT;
+	}
 
 	rooms = initialize_rooms(defname);
 	users_connected = create_list();
@@ -295,7 +301,7 @@ void cre(int sock, char *roomname) {
    }
    
 }
+
 void fue(int sock) {
    write(sock, "Hasta luego", 256);
-
 }
