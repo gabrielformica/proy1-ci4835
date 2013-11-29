@@ -19,18 +19,17 @@ void men();
 void des();
 void sus();
 void fue();
+void eli();
 void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
-
-
 list rooms;   
 list users_connected;
 
-
 typedef struct thread_data thread_data;
+
 struct thread_data {
    int client_sock;
    list subscribed_rooms; 
@@ -40,7 +39,6 @@ thread_data prepare_thread_data();
 
 int main(int argc, char *argv[]) {
 
-   /* declare */
    char opts;
    int sockfd, client_sock, portno;
    socklen_t clilen;
@@ -48,12 +46,17 @@ int main(int argc, char *argv[]) {
    char *defname = NULL;
    struct sockaddr_in serv_addr, cli_addr;
    int n;
-	
 
-   if (argc < 5) {
-      fprintf(stderr,"ERROR, wrong number of arguments.\n");
-      exit(1);
-   } 
+   /* if (argc > 5) { */
+   /*    fprintf(stderr,"Error: wrong number of arguments.\n"); */
+   /*    exit(1); */
+   /* } else if (argc = 3) { */
+   /*    if((defname = (char *) malloc(sizeof(char)*strlen("actual"))) == NULL) { */
+   /*       perror("Error malloc"); */
+   /*       exit(1); */
+   /*    } */
+   /*    defname = "actual"; */
+   /* } */
 
    while ((opts = getopt(argc, argv, ":p:s:")) != -1) {
       switch (opts) {
@@ -125,6 +128,7 @@ void *connection_handler(void *td) {
    memset(message, 0, 256);
 
    user_data *user = wait_username(rooms, sock);  //user points to the box of the user
+   user->subscribed_rooms = subscribed_rooms;
    add(users_connected, user);
    printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
    add(subscribed_rooms, rooms->first);	
@@ -170,11 +174,17 @@ void *connection_handler(void *td) {
             aux[i] = message[i+4];
             i++;
          }
-         cre(sock,aux);
+         cre(sock, aux);
       }
       else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
          //	message = "Mandaste ELI";
-         write(sock, message, strlen(client_message));	
+         int i	= 0;	
+         memset(aux, 0, 30);
+         while  (message[i+4] != '\n') {
+            aux[i] = message[i+4];
+            i++;
+         }
+         eli(aux, sock, user);
       }
       else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
          fue(sock, subscribed_rooms, user);
@@ -306,4 +316,27 @@ void fue(int sock, list sub_rooms, user_data *ud) {
    write(sock, "See you later", 256);
    close(sock);
    return;      
+}
+
+void eli
+(char *roomname, int sock, user_data *ud) {
+   box *temp, *temp2;
+   temp = get_room(rooms, roomname);
+   printf ("Eliminarás: %s\n", ((room *) temp->elem)->name);
+   temp2 = users_connected->first;
+
+   while (temp2 != NULL) {
+      box *temp3 = ((user_data *) temp2->elem)->subscribed_rooms->first;
+      user_data *user = temp2->elem;
+      while (temp3 != NULL) {
+         if (temp3 == temp)
+            del(user->subscribed_rooms, temp3);
+         temp3 = temp3 -> next;
+      }
+      temp2 = temp2->next;
+   }
+   del(rooms,temp);
+   destroy(((room *) temp->elem)->users);
+   free(temp->elem);
+   free(temp);
 }

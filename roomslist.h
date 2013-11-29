@@ -13,8 +13,9 @@ struct room {
 };
 
 struct user_data {
-	char *name;
-	int socket;
+   char *name;
+   int socket;
+   list subscribed_rooms;
 };
 
 

@@ -2,7 +2,7 @@
 *.out
 client
 server
-#*
+\#*
 *.cache
 .*
 
