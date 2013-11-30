@@ -53,18 +53,6 @@ int main(int argc, char *argv[]) {
       exit(1);
    } 
 
-   /* if (argc > 5) { */
-   /*    fprintf(stderr,"Error: wrong number of arguments.\n"); */
-   /*    exit(1); */
-   /* } else if (argc = 3) { */
-   /*    if((defname = (char *) malloc(sizeof(char)*strlen("actual"))) == NULL) { */
-   /*       perror("Error malloc"); */
-   /*       exit(1); */
-   /*    } */
-   /*    defname = "actual"; */
-   /* } */
-
-   /* Se reciben los parámetros en tipo flag */
 
    while ((opts = getopt(argc, argv, ":p:s:")) != -1) {
       switch (opts) {
@@ -140,8 +128,8 @@ void *connection_handler(void *td) {
    int sock = ((thread_data *) td)->client_sock;
    list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
    char aux[30];
-   char message[256];
-   memset(message, 0, 256);
+   char msg[256];
+   memset(msg, 0, 256);
 
    user_data *user = wait_username(rooms, sock);  //user points to the box of the user
    user->subscribed_rooms = subscribed_rooms;
@@ -150,62 +138,81 @@ void *connection_handler(void *td) {
    add(subscribed_rooms, rooms->first);	
    printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
    int read_size;
-   while ((read_size = recv(sock, message, 256, 0)) > 0) {
+   while ((read_size = recv(sock, msg, 256, 0)) > 0) {
       pthread_mutex_lock(&mutex);
       if (read_size < 3) {
       }
-      else if ((message[0] == 's') && (message[1] == 'u') && (message[2] == 's')) {
+      else if ((msg[0] == 's') && (msg[1] == 'u') && (msg[2] == 's')) {
          printf("holaa\n");
          int i	= 0;	
          memset(aux, 0, 30);
-         while  (message[i+4] != '\n') {
-            aux[i] = message[i+4];
+         while  (msg[i+4] != '\n') {
+            aux[i] = msg[i+4];
             i++;
          }
          printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
          sus(aux, user);
       }
-      else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
+      else if ((msg[0] == 's') && (msg[1] == 'a') && (msg[2] == 'l')) {
          sal(sock);
       } 
-      else if ((message[0] == 'm') && (message[1] == 'e') && (message[2] == 'n')) {
+      else if ((msg[0] == 'm') && (msg[1] == 'e') && (msg[2] == 'n')) {
          int i	= 0;	
          memset(aux, 0, 30);
-         while  (message[i+4] != '\n') {
-            aux[i] = message[i+4];
+         while  (msg[i+4] != '\n') {
+            aux[i] = msg[i+4];
             i++;
          }
          men(user, subscribed_rooms, aux);
       }
-      else if ((message[0] == 'u') && (message[1] == 's') && (message[2] == 'u')) {
+      else if ((msg[0] == 'u') && (msg[1] == 's') && (msg[2] == 'u')) {
          usu(sock); 
       }
-      else if ((message[0] == 'd') && (message[1] == 'e') && (message[2] == 's')) {
+      else if ((msg[0] == 'd') && (msg[1] == 'e') && (msg[2] == 's')) {
          des(subscribed_rooms, user);
       }
-      else if ((message[0] == 'c') && (message[1] == 'r') && (message[2] == 'e')) {
+      else if ((msg[0] == 'c') && (msg[1] == 'r') && (msg[2] == 'e')) {
          int i	= 0;	
          memset(aux, 0, 30);
-         while  (message[i+4] != '\n') {
-            aux[i] = message[i+4];
+         while  (msg[i+4] != '\n') {
+            aux[i] = msg[i+4];
             i++;
          }
          cre(sock, aux);
       }
-      else if ((message[0] == 'e') && (message[1] == 'l') && (message[2] == 'i')) {
+      else if ((msg[0] == 'e') && (msg[1] == 'l') && (msg[2] == 'i')) {
          //	message = "Mandaste ELI";
          int i	= 0;	
          memset(aux, 0, 30);
-         while  (message[i+4] != '\n') {
-            aux[i] = message[i+4];
+         while  (msg[i+4] != '\n') {
+            aux[i] = msg[i+4];
             i++;
          }
          eli(aux, sock, user);
       }
-      else if ((message[0] == 'f') && (message[1] == 'u') && (message[2] == 'e')) {
+      else if ((msg[0] == 'f') && (msg[1] == 'u') && (msg[2] == 'e')) {
          fue(sock, subscribed_rooms, user);
       }
-      memset(message, 0, strlen(message));
+      else if ((msg[0] == 'h') && (msg[1] == 'l') && (msg[2] == 'p')) {
+			memset(msg, 0, 256);
+			strcat(msg, "-----------\n");
+			strcat(msg, "The valids commands formats are:\n");
+			strcat(msg, "sus <room name>\n");
+			strcat(msg, "cre <room name>\n");
+			strcat(msg, "eli <room name>\n");
+			strcat(msg, "sal\n");
+			strcat(msg, "usu\n");
+			strcat(msg, "des\n");
+			strcat(msg, "fue\n");
+			strcat(msg, "-----------");
+			write(sock,	msg, 256);
+      }
+		else {
+			memset(msg, 0, 256);
+			strcat(msg, "Debes escribir un comando valido. Haz hlp para ver una ayuda de comandos");
+			write(sock,	msg, 256);
+		}
+      memset(msg, 0, strlen(msg));
       pthread_mutex_unlock(&mutex);
    }
 }
