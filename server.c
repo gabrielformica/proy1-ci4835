@@ -20,19 +20,12 @@ void men();
 void des();
 void sus();
 void fue();
-<<<<<<< HEAD
-=======
 void eli();
->>>>>>> 8a51a834c2a19d5ee7197ab10ce1eb2adc10b722
 void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
-<<<<<<< HEAD
-
-=======
->>>>>>> 8a51a834c2a19d5ee7197ab10ce1eb2adc10b722
 list rooms;   
 list users_connected;
 
@@ -54,12 +47,12 @@ int main(int argc, char *argv[]) {
    struct sockaddr_in serv_addr, cli_addr;
    int n;
 
-<<<<<<< HEAD
+
    if (argc < 3) {
       fprintf(stderr,"ERROR, wrong number of arguments.\n");
       exit(1);
    } 
-=======
+
    /* if (argc > 5) { */
    /*    fprintf(stderr,"Error: wrong number of arguments.\n"); */
    /*    exit(1); */
@@ -70,7 +63,8 @@ int main(int argc, char *argv[]) {
    /*    } */
    /*    defname = "actual"; */
    /* } */
->>>>>>> 8a51a834c2a19d5ee7197ab10ce1eb2adc10b722
+
+   /* Se reciben los parámetros en tipo flag */
 
    while ((opts = getopt(argc, argv, ":p:s:")) != -1) {
       switch (opts) {
@@ -93,27 +87,20 @@ int main(int argc, char *argv[]) {
       }
    }
 
-<<<<<<< HEAD
-	if (defname == NULL) {
-		if ((defname = (char *) malloc(sizeof(char)*strlen(optarg))) == NULL) {
-			perror("Error malloc");
-			exit(1);	
-		}
-		defname = DEFAULT;
-	}
 
-	rooms = initialize_rooms(defname);
-	users_connected = create_list();
-	add_room(rooms,"A");
-	
-=======
+   if (defname == NULL) {
+      if ((defname = (char *) malloc(sizeof(char)*strlen(optarg))) == NULL) {
+         perror("Error malloc");
+         exit(1);	
+      }
+      defname = DEFAULT;
+   }
+
    rooms = initialize_rooms(defname);
    users_connected = create_list();
    add_room(rooms,"A");
-    
->>>>>>> 8a51a834c2a19d5ee7197ab10ce1eb2adc10b722
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-   if (sockfd < 0) 
+   if (sockfd < 0)
       error("ERROR opening socket");
    bzero((char *) &serv_addr, sizeof(serv_addr));
    serv_addr.sin_family = AF_INET;
@@ -176,7 +163,7 @@ void *connection_handler(void *td) {
             i++;
          }
          printf("este es largo %d y te vas a suscribir a: -%s-\n",read_size, aux);
-         sus(subscribed_rooms, aux, user);
+         sus(aux, user);
       }
       else if ((message[0] == 's') && (message[1] == 'a') && (message[2] == 'l')) {
          sal(sock);
@@ -235,9 +222,18 @@ void error(const char *msg) {
    exit(1);
 }
 
-void sus(list subs_rooms, char *roomname, user_data *ud) {
+void sus(char *roomname, user_data *ud) {
+   list subs_rooms = ud->subscribed_rooms;
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
+   box *tmp;
+   tmp = subs_rooms->first;
+   printf ("Usuario %s está suscrito a:\n", ud->name);
+   while (tmp != NULL) {
+      room *temp_room = tmp->elem;
+      printf ("*%s\n", temp_room->name);
+      tmp = tmp->next;
+   }
 }
 
 void des(list subs_rooms, user_data *ud) {
@@ -346,25 +342,32 @@ void fue(int sock, list sub_rooms, user_data *ud) {
    return;      
 }
 
-void eli
-(char *roomname, int sock, user_data *ud) {
+void eli(char *roomname, int sock, user_data *ud) {
    box *temp, *temp2;
+   room *temp_room;
    temp = get_room(rooms, roomname);
-   printf ("Eliminarás: %s\n", ((room *) temp->elem)->name);
+   temp_room = temp->elem;
+
+   /* printf ("Voy a borrar: %s\n", ((room *) temp->elem)->name); */
    temp2 = users_connected->first;
+   /* printf ("El nombre de primer usuario es: %s \n", ((user_data *) temp2->elem)->name); */
 
    while (temp2 != NULL) {
-      box *temp3 = ((user_data *) temp2->elem)->subscribed_rooms->first;
       user_data *user = temp2->elem;
+      box *temp3 = user->subscribed_rooms->first;
+
+      /* room *user_room = temp3->elem; */
+      /* printf ("---%s\n", temp3->name); */
+
       while (temp3 != NULL) {
          if (temp3 == temp)
-            del(user->subscribed_rooms, temp3);
+            del(user->subscribed_rooms, temp3->elem);
          temp3 = temp3 -> next;
       }
       temp2 = temp2->next;
    }
-   del(rooms,temp);
-   destroy(((room *) temp->elem)->users);
-   free(temp->elem);
-   free(temp);
+   if (del(rooms,temp->elem))
+      printf ("DO\n");;
+   //   destroy(((room *) temp->elem)->users);
+   free(temp_room);
 }
