@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
 
    if (defname == NULL) {
-      if ((defname = (char *) malloc(sizeof(char)*strlen(optarg))) == NULL) {
+      if ((defname = (char *) malloc(sizeof(char)*strlen(DEFAULT))) == NULL) {
          perror("Error malloc");
          exit(1);	
       }
@@ -224,14 +224,15 @@ void error(const char *msg) {
 
 void sus(char *roomname, user_data *ud) {
    list subs_rooms = ud->subscribed_rooms;
+	printf("Se va a suscribir al usuario %s a la sala %s\n",ud->name,roomname);
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
    box *tmp;
    tmp = subs_rooms->first;
    printf ("Usuario %s está suscrito a:\n", ud->name);
    while (tmp != NULL) {
-      room *temp_room = tmp->elem;
-      printf ("*%s\n", temp_room->name);
+      box *temp_room = tmp->elem;
+      printf ("*%s\n", ((room *) temp_room->elem)->name);
       tmp = tmp->next;
    }
 }
@@ -294,6 +295,7 @@ void men(user_data *user, list subs_rooms, char *msg) {
    char *buffer = malloc(sizeof(char)*256);
    box *temp = subs_rooms->first;	
    while (temp != NULL) {
+		printf("La sala a la que se hara broadcast sera %s\n", ((room *) ((box *) temp->elem)->elem)->name);
       memset(buffer, 0, 256);
       int i;
       strcpy(buffer, user->name);
@@ -317,16 +319,22 @@ void usu(int sock) {
 }
 
 void cre(int sock, char *roomname) {
+	char *name;
+	if ((name = malloc(sizeof(char)*strlen(roomname))) == NULL) {
+		perror("ERROR malloc");
+	}
+	strcpy(name, roomname);
+	printf("Se va a crear la sala de nombre: -%s-\n", roomname);
    box *temp;
 
-   if ((temp  = get_room(rooms, roomname)) != NULL) {
+   if ((temp  = get_room(rooms, name)) != NULL) {
       write(sock, "Room already exists", 256);
       return;
    }
    temp = NULL;
 
-   if ((temp = add_room(rooms, roomname)) == NULL) {
-      write(sock, "Room already exists", 256);
+   if ((temp = add_room(rooms, name)) == NULL) {
+      write(sock, "Problem creating room", 256);
       return;
    }
    
