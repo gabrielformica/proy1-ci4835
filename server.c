@@ -27,7 +27,7 @@ user_data *wait_username();
 pthread_mutex_t mutex;
 char client_message[2000];
 list rooms;   
-list users_connected;
+list connected_users;
 
 typedef struct thread_data thread_data;
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
    }
 
    rooms = initialize_rooms(defname);
-   users_connected = create_list();
+   connected_users = create_list();
    add_room(rooms,"A");
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
    if (sockfd < 0)
@@ -133,7 +133,7 @@ void *connection_handler(void *td) {
 
    user_data *user = wait_username(rooms, sock);  //user points to the box of the user
    user->subscribed_rooms = subscribed_rooms;
-   add(users_connected, user);
+   add(connected_users, user);
    printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
    add(subscribed_rooms, rooms->first);	
    printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
@@ -181,7 +181,6 @@ void *connection_handler(void *td) {
          cre(sock, aux);
       }
       else if ((msg[0] == 'e') && (msg[1] == 'l') && (msg[2] == 'i')) {
-         //	message = "Mandaste ELI";
          int i	= 0;	
          memset(aux, 0, 30);
          while  (msg[i+4] != '\n') {
@@ -318,7 +317,7 @@ void men(user_data *user, list subs_rooms, char *msg) {
 }
 
 void usu(int sock) {
-   box *temp = users_connected->first;	
+   box *temp = connected_users->first;	
    while (temp != NULL) {
       write(sock, ((user_data *) temp->elem)->name, 256);
       temp = temp->next;
@@ -348,9 +347,9 @@ void cre(int sock, char *roomname) {
 }
 
 void fue(int sock, list sub_rooms, user_data *ud) {
-   box *temp = users_connected->first;
+   box *temp = connected_users->first;
    des(sub_rooms, ud);
-   del(users_connected,ud);
+   del(connected_users,ud);
    free(ud);
    write(sock, "See you later", 256);
    close(sock);
@@ -358,31 +357,29 @@ void fue(int sock, list sub_rooms, user_data *ud) {
 }
 
 void eli(char *roomname, int sock, user_data *ud) {
-   box *temp, *temp2;
-   room *temp_room;
-   temp = get_room(rooms, roomname);
-   temp_room = temp->elem;
+	printf("Se intentara borrar -%s-\n",roomname);
+	box *temp_room = get_room(rooms, roomname);
+	if (temp_room == NULL) {
+		write(sock, "You can't delete a room that doesn't exist", 256);
+		return;
+	}
+	if (temp_room == rooms->first) {
+		write(sock, "You just can't delete the default room", 256);
+		return;
+	}
 
-   /* printf ("Voy a borrar: %s\n", ((room *) temp->elem)->name); */
-   temp2 = users_connected->first;
-   /* printf ("El nombre de primer usuario es: %s \n", ((user_data *) temp2->elem)->name); */
+	box *temp_cu = connected_users->first;
+	//delete subscriptions to the rooms of every user
+	while (temp_cu != NULL) { 
+		if (del(get_subscribed_rooms(temp_cu->elem), temp_room))
+			printf("Al usuario %s se le acaba de borrar %s\n",((user_data *) temp_cu->elem)->name,((room *) temp_room->elem)->name);
+		temp_cu = temp_cu->next;
+	}
 
-   while (temp2 != NULL) {
-      user_data *user = temp2->elem;
-      box *temp3 = user->subscribed_rooms->first;
+	//destroy list of users in the room
+	list userslist = get_userslist(temp_room->elem);
+	destroy(userslist);
 
-      /* room *user_room = temp3->elem; */
-      /* printf ("---%s\n", temp3->name); */
-
-      while (temp3 != NULL) {
-         if (temp3 == temp)
-            del(user->subscribed_rooms, temp3->elem);
-         temp3 = temp3 -> next;
-      }
-      temp2 = temp2->next;
-   }
-   if (del(rooms,temp->elem))
-      printf ("DO\n");;
-   //   destroy(((room *) temp->elem)->users);
-   free(temp_room);
+	//delete the room
+	del(rooms, temp_room->elem);
 }
