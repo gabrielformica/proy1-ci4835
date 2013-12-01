@@ -85,7 +85,7 @@ box *add_room(list l, char *name) {
 		perror("ERROR malloc room");
 		return NULL;
 	}
-
+    memset(temp, 0, sizeof(room));
 	temp->name = name;
 	temp->users = create_list();
 	return (add(l,temp));
@@ -126,10 +126,13 @@ bool room_is_in(char *name, list l) {
   */
 
 box *get_room(list l, char *roomname) {
-	box *temp = l->first;
-	while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, roomname) != 0))
-		temp = temp->next;
-	return temp;
+
+   box *temp = l->first;
+   while ((temp != NULL) && (strcmp(((room *)temp->elem)->name, roomname) != 0))
+      temp = temp->next;
+   if (temp)
+      printf ("Encontró: -%s-\n", ((room *)temp->elem)->name);
+   return temp;
 }
 
 /**

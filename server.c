@@ -141,12 +141,13 @@ void *connection_handler(void *td) {
    list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
    char aux[30];
    char message[256];
-   memset(message, 0, 256);
 
+   memset(message, 0, 256);
+   memset(aux, 0, 30);
    user_data *user = wait_username(rooms, sock);  //user points to the box of the user
    user->subscribed_rooms = subscribed_rooms;
    add(users_connected, user);
-   printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
+   /* printf("este es el nombre de usuario: -%s-\n", ((char *) user->name)); */
    add(subscribed_rooms, rooms->first);	
    printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
    int read_size;
@@ -276,7 +277,8 @@ void sal(int sock) {
    box *temp = rooms->first;
    while (temp != NULL) {
       printf("ESTAS SON LAS SALASSS : %s\n",((room *) temp->elem)->name);
-      write(sock, ((room *) temp->elem)->name, 256);
+      room *temp_room = temp->elem;
+      write(sock, temp_room->name, 256);
       temp = temp->next;
    }
 }
@@ -329,7 +331,6 @@ void cre(int sock, char *roomname) {
       write(sock, "Room already exists", 256);
       return;
    }
-   
 }
 
 void fue(int sock, list sub_rooms, user_data *ud) {
