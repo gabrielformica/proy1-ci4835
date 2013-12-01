@@ -1,3 +1,13 @@
+/**
+  * @file
+  * @author Gabriel Formica <gabriel@ac.labf.usb.ve>
+  * @author Melecio Ponte <melecio@ac.labf.usb.ve> 
+  *
+  * @section Descripcion
+  *
+  * List of rooms that implements generic lists
+  */
+
 #include "list.h"
 
 #ifndef ROOMSLIST_H

@@ -10,3 +10,5 @@ server
 testmain
 capture.lo
 *.txt
+html/*
+latex/*
