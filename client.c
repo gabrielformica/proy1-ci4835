@@ -158,7 +158,6 @@ void *reading_stdin(void *sockfd) {
       
    while(!quit_request) {
       fgets(message, 256, stdin);
-		printf("Voy a escribir:\n---%s---\n",message);
       pthread_mutex_lock(&mutex);
       write(sock, message, 256);
       bzero(message, 256);
