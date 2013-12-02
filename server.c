@@ -242,6 +242,10 @@ void error(const char *msg) {
 
 void sus(char *roomname, user_data *ud) {
    list subs_rooms = ud->subscribed_rooms;
+   if (get_room(rooms, roomname) == NULL) {
+      write(get_socket(ud), "Sorry, this room does not exist", 256);
+      return;
+   }
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
 }
