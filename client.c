@@ -203,6 +203,6 @@ void mfree(void * p) {
 void INThandler(int sig) {
    signal(sig, SIG_IGN);
    printf (" is not the correct way to quit.\n"
-           "Use \"fue\" insted\n\r");
+           "Use \"fue\" instead\n\r");
    return;
 }

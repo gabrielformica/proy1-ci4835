@@ -45,7 +45,7 @@ box *add(list l, void *elem) {
 		perror("ERROR malloc");
 		return NULL;
 	}
-    memset(temp, 0, sizeof(box));
+
 	temp->elem = elem;
 	temp->next = NULL;
 	if (l->size == 0) {
@@ -59,6 +59,24 @@ box *add(list l, void *elem) {
 		++(l->size);
 	}
 	return temp;
+}
+
+/**
+  * Look if an element is in a list
+  * @param elem: the element it is desired to find
+  * @param l: The list. It is a valid list
+  * @return True if the element is in list. False in any other case
+  */
+
+bool is_in(void * elem, list l) {
+	box *temp = l->first;
+	while (temp != NULL) {
+		if (temp->elem == elem) {
+			return true;
+		}
+		temp = temp->next;
+	}
+	return false;
 }
 
 /**

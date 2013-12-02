@@ -38,7 +38,6 @@ void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
-/* char client_message[2000]; */
 list rooms;   
 list connected_users;
 
@@ -256,6 +255,12 @@ void sus(char *roomname, user_data *ud) {
       write(get_socket(ud), "Sorry, this room does not exist", MAX_PACK_SIZE);
       return;
    }
+	if (is_in(get_room(rooms, roomname), subs_rooms)) {
+		write(get_socket(ud), 
+				"You are already subscribed to this room", 
+				MAX_PACK_SIZE);
+		return;
+	}
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
 }
