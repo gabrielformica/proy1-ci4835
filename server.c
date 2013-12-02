@@ -1,3 +1,13 @@
+/**
+  * @file
+  * @author Gabriel Formica <gabriel@ac.labf.usb.ve>
+  * @author Melecio Ponte <melecio@ac.labf.usb.ve> 
+  *
+  * @section Descripcion
+  *
+  * Server code of the chat
+  */
+
 #include <netinet/tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,11 +58,10 @@ int main(int argc, char *argv[]) {
    int n;
 
 
-   if (argc < 3) {
+   if (argc < 3) {    //port is needed 
       fprintf(stderr,"ERROR, wrong number of arguments.\n");
       exit(1);
    } 
-
 
    while ((opts = getopt(argc, argv, ":p:s:")) != -1) {
       switch (opts) {
@@ -70,8 +79,7 @@ int main(int argc, char *argv[]) {
       }
    }
 
-
-   if (defname == NULL) {
+   if (defname == NULL) {  
       if ((defname = (char *) malloc(sizeof(char)*strlen(DEFAULT))) == NULL)
          error("Malloc failed");
       defname = DEFAULT;
@@ -91,16 +99,16 @@ int main(int argc, char *argv[]) {
    	error("Binding failed");
 
 
-   /* Aquí empiezan a hacerse los hilos */
+   /* Accept connections and create threads*/
 
    listen(sockfd,3);
    clilen = sizeof(cli_addr);
    pthread_t thread_id;
-   pthread_mutex_init(&mutex,NULL);
+   pthread_mutex_init(&mutex,NULL);  
    while (client_sock = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
       int flag = 1;
-      int result = setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY,
-                              (char *) &flag, sizeof(int));
+      int result = setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY, 
+														(char *) &flag, sizeof(int));
       printf("Connection accepted\n");
       thread_data tdata = prepare_thread_data(client_sock, create_list());
 		
@@ -114,7 +122,6 @@ int main(int argc, char *argv[]) {
 void *connection_handler(void *td) {
    int sock = ((thread_data *) td)->client_sock;
    list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
-   char aux[256];
    char msg[256];
    memset(msg, 0, 256);
 

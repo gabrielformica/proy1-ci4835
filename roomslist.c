@@ -13,7 +13,6 @@
 #include <string.h>
 #include "list.h"
 #include "roomslist.h"
-#define DEFAULT "actual"
 
 
 /**
@@ -24,14 +23,7 @@
 
 list initialize_rooms(char *defname) {
 	list rooms = create_list();
-	if (defname == NULL) {
-		if ((defname = (char *) malloc(sizeof(char)*strlen(DEFAULT))) == NULL) {
-			perror("ERROR malloc defname");
-			exit(1);
-		}
-		defname = DEFAULT;
-	}
-	
+
 	if (! (add_room(rooms, defname))) 
 		perror("ERROR adding room");
 

@@ -1,3 +1,14 @@
+/**
+  * @file
+  * @author Gabriel Formica <gabriel@ac.labf.usb.ve>
+  * @author Melecio Ponte <melecio@ac.labf.usb.ve> 
+  *
+  * @section Descripcion
+  *
+  * Client code of the chat
+  */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
