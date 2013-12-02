@@ -84,4 +84,21 @@ extern box *get_room(list,char *);
   */
 
 extern bool del_user(list, char*, void *);
+
+/**
+  * Get the list subscribed_rooms of user_data *
+  * @param ud: pointer to user_data
+  * @return the list of subscribed_rooms
+  */
+
+extern list get_subscribed_rooms(user_data *); 
+
+/**
+  * Get the users of a room
+  * @param r: pointer to the room
+  * return: The users added to that room
+  */
+
+extern list get_userslist(room *r);
+
 #endif

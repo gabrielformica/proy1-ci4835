@@ -148,4 +148,22 @@ bool del_user(list l, char *roomname, void *user) {
 	return del(((room *) temp->elem)->users, user);
 }
 
+/**
+  * Get the list subscribed_rooms of user_data *
+  * @param ud: pointer to user_data
+  * @return the list of subscribed_rooms
+  */
 
+list get_subscribed_rooms(user_data * ud) {
+	return ud->subscribed_rooms;
+}
+
+/**
+  * Get the users of a room
+  * @param r: pointer to the room
+  * return: The users added to that room
+  */
+
+list get_userslist(room *r) {
+	return r->users;
+}

@@ -139,7 +139,7 @@ void *reading_stdin(void *sockfd) {
    size_t len = 0;
    ssize_t read;
 
-   bzero(message,256);
+   bzero(message, 256);
    write(sock, username, strlen(username));
    if (cfile) {
       fp = fopen(comfile, "r");
@@ -157,10 +157,11 @@ void *reading_stdin(void *sockfd) {
    }
       
    while(!quit_request) {
-      fgets(message,256,stdin);
+      fgets(message, 256, stdin);
+		printf("Voy a escribir:\n---%s---\n",message);
       pthread_mutex_lock(&mutex);
-      write(sock,message,256);
-      bzero(message,256);
+      write(sock, message, 256);
+      bzero(message, 256);
       pthread_mutex_unlock(&mutex);
    }
    printf ("EL BEBO\n");
