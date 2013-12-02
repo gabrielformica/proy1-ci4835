@@ -142,7 +142,9 @@ void *connection_handler(void *td) {
       else if ((msg[0] == 's') && (msg[1] == 'a') && (msg[2] == 'l')) {
          sal(sock);
       } 
-      else if ((msg[0] == 'm') && (msg[1] == 'e') && (msg[2] == 'n')) {
+      else if ((strlen(msg) >= 4) && 
+					(msg[3] == ' ') &&
+					(msg[0] == 'm') && (msg[1] == 'e') && (msg[2] == 'n')) {
 			memmove(msg, msg+4, 252);
 			msg[strlen(msg)-1] = '\0';   //replace new line
          men(user, subscribed_rooms, msg);
