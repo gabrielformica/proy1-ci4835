@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
          portno = atoi(optarg);
          break;
       case '?':
-         printf("Urecognized option. Try again\n");
+         printf("Urecognized option. Try again.\n");
 			exit(1);
       }
    }
@@ -119,6 +119,11 @@ int main(int argc, char *argv[]) {
    }
 }
 
+/**
+  * Task that thread of connection is running 
+  * @param tdata: the thread data
+  */
+
 void *connection_handler(void *td) {
    int sock = ((thread_data *) td)->client_sock;
    list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
@@ -134,41 +139,52 @@ void *connection_handler(void *td) {
       pthread_mutex_lock(&mutex);
       if (read_size < 3) {
       }
-      else if ((msg[0] == 's') && (msg[1] == 'u') && (msg[2] == 's')) {
+      else if ((strlen(msg) >= 6) &&
+					(msg[3] == ' ') && 
+					(msg[0] == 's') && (msg[1] == 'u') && (msg[2] == 's')) {
 			memmove(msg, msg+4, 252);
 			msg[strlen(msg)-1] = '\0';   //replace new line
          sus(msg, user);
       }
-      else if ((msg[0] == 's') && (msg[1] == 'a') && (msg[2] == 'l')) {
+      else if ((strlen(msg) == 4) &&
+					(msg[0] == 's') && (msg[1] == 'a') && (msg[2] == 'l')) {
          sal(sock);
       } 
-      else if ((strlen(msg) >= 4) && 
+      else if ((strlen(msg) >= 6) &&  //because of new line
 					(msg[3] == ' ') &&
 					(msg[0] == 'm') && (msg[1] == 'e') && (msg[2] == 'n')) {
 			memmove(msg, msg+4, 252);
 			msg[strlen(msg)-1] = '\0';   //replace new line
          men(user, subscribed_rooms, msg);
       }
-      else if ((msg[0] == 'u') && (msg[1] == 's') && (msg[2] == 'u')) {
+      else if ((strlen(msg) == 4) &&
+					(msg[0] == 'u') && (msg[1] == 's') && (msg[2] == 'u')) {
          usu(sock); 
       }
-      else if ((msg[0] == 'd') && (msg[1] == 'e') && (msg[2] == 's')) {
+      else if ((strlen(msg) == 4) &&
+					(msg[0] == 'd') && (msg[1] == 'e') && (msg[2] == 's')) {
          des(subscribed_rooms, user);
       }
-      else if ((msg[0] == 'c') && (msg[1] == 'r') && (msg[2] == 'e')) {
+      else if ((strlen(msg) >= 6) &&
+					(msg[3] == ' ') && 
+					(msg[0] == 'c') && (msg[1] == 'r') && (msg[2] == 'e')) {
 			memmove(msg, msg+4, 252);
 			msg[strlen(msg)-1] = '\0';   //replace new line
          cre(sock, msg);
       }
-      else if ((msg[0] == 'e') && (msg[1] == 'l') && (msg[2] == 'i')) {
+      else if ((strlen(msg) >= 6) &&
+					(msg[3] == ' ') && 	
+					(msg[0] == 'e') && (msg[1] == 'l') && (msg[2] == 'i')) {
 			memmove(msg, msg+4, 252);
 			msg[strlen(msg)-1] = '\0';   //replace new line
          eli(msg, sock, user);
       }
-      else if ((msg[0] == 'f') && (msg[1] == 'u') && (msg[2] == 'e')) {
+      else if ((strlen(msg) == 4) &&
+					(msg[0] == 'f') && (msg[1] == 'u') && (msg[2] == 'e')) {
          fue(subscribed_rooms, user);
       }
-      else if ((msg[0] == 'h') && (msg[1] == 'l') && (msg[2] == 'p')) {
+      else if ((strlen(msg) == 4) &&
+					(msg[0] == 'h') && (msg[1] == 'l') && (msg[2] == 'p')) {
 			memset(msg, 0, 256);
 			strcat(msg, "-----------\n");
 			strcat(msg, "The valids commands formats are:\n");
@@ -193,12 +209,25 @@ void *connection_handler(void *td) {
    }
 }
 
+
+/**
+  * Prepare the thread data 
+  * @param client_sock: socket of client
+  * @param l: list of subscribed rooms of client
+  * @return An initialized thread data
+  */
+
 thread_data prepare_thread_data(int client_sock, list l) {
    thread_data temp; 
    temp.client_sock = client_sock;
    temp.subscribed_rooms = l;
    return temp;
 }
+
+/**
+  * Send an error message and terminate the program
+  * @param msg: msg to be sended
+  */
 
 void error(const char *msg) {
    perror(msg);
@@ -254,7 +283,7 @@ void sal(int socket) {
 	char *buffer;
 	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
 		perror("Malloc failed");
-		write(socket, "No se pueden mostrar las salas en este momento", 256);
+		write(socket, "Sorry, problems with server. Try again", 256);
 	} 
 	else {
 		while (temp != NULL) {
@@ -303,11 +332,24 @@ void men(user_data *user, list subs_rooms, char *msg) {
 }
 
 void usu(int socket) {
+   write(socket, "---These are all the users on-line---", 256);
    box *temp = connected_users->first;	
-   while (temp != NULL) {
-      write(socket, ((user_data *) temp->elem)->name, 256);
-      temp = temp->next;
-   }
+	char *buffer;
+	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
+		perror("Malloc failed");
+		write(socket, "Sorry, problems with server. Try again", 256);
+	} 
+	else {
+		while (temp != NULL) {
+			memset(buffer, 0, 256);
+			strcat(buffer, "* ");
+			strcat(buffer, get_name((user_data *) temp->elem)); 
+			write(socket, buffer, 256);
+			temp = temp->next;
+		}
+		write(socket, "-----------------------------", 256);
+		free(buffer);
+	}
 }
 
 void cre(int socket, char *roomname) {

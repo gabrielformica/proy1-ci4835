@@ -30,7 +30,7 @@ struct user_data {
 
 
 /**
-  * Initliaze the list of rooms
+  * Initialize the list of rooms
   * @param defname: the name of the first room (default room)
   * @return A valid list of rooms 
   */

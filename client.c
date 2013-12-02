@@ -43,44 +43,39 @@ int main(int argc, char *argv[]) {
          int size;
       case 'h': 
          if ((host = (char *) malloc(sizeof(char)*strlen(optarg))) == NULL) {
-            perror("Error malloc host");
+            error("Malloc failed");
          }
          host = optarg;
-         printf("Flag -h, with parameter %s\n",host);
          break;
       case 'p':
          portno = atoi(optarg);
-         printf("Flag -p, with parameter %d\n",portno);
          break;
       case 'n': 
          size = sizeof(char)*strlen(optarg);
          if ((username = (char *) malloc(size)) == NULL) {
-            perror("Error malloc username");
-            exit(1);
+            error("Malloc failed");
          }
          username = optarg;
-         printf("Flag -n, with paremeter %s\n",username);
          break;
       case 'a': 
          size = sizeof(char)*strlen(optarg);
          if ((comfile = malloc(size)) == NULL) {
-            perror("Error malloc comfile");
-            exit(1);
+            error("Malloc failed");
          }
          comfile = optarg;
-         printf("Flag -a, with paremeter %s\n",comfile);
          cfile = true;
          break;
       case '?':
-         printf("ERROR with flags\n");
+         printf("Unrecognized option. Try again.\n");
+			exit(1);
       }
    }
 
    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-      error("ERROR opening socket");
+      error("Could not open socket");
 
    if ((server = gethostbyname(host)) == NULL) 
-      error("ERROR no such host");
+      error("No such host");
 	
    bzero((char *) &serv_addr, sizeof(serv_addr));
    serv_addr.sin_family = AF_INET;
@@ -89,19 +84,19 @@ int main(int argc, char *argv[]) {
          server->h_length);
    serv_addr.sin_port = htons(portno);
 
-   /* Se hace la conexion */
+	//Connecting
    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-      error("ERROR connecting");
+      error("Could not connect");
    }
-   printf("You are connected\n");
+	printf("-------------------\n");
+   printf("-You are connected-\n");
+	printf("-------------------\n");
 
-   /* se inicia el mutex */
-   pthread_mutex_init(&mutex,NULL);
+   pthread_mutex_init(&mutex,NULL); //Initialize mutex
 
    pthread_t pthread_id;
    if (pthread_create(&pthread_id, NULL, reading_stdin, (void *)&sockfd)) {
-      perror("Could not create thread");
-      exit(1);
+      error("Could not create thread");
    }
 
    while(1) {
@@ -139,7 +134,7 @@ int main(int argc, char *argv[]) {
 
 void error(char *msg) {
 	perror(msg);
-	exit(0);
+	exit(1);
 }
 
 
@@ -170,14 +165,11 @@ void *reading_stdin(void *sockfd) {
       
    while(!quit_request) {
       fgets(message, 256, stdin);
-		printf("Voy a escribir:\n---%s---\n",message);
       pthread_mutex_lock(&mutex);
       write(sock, message, 256);
       bzero(message, 256);
       pthread_mutex_unlock(&mutex);
    }
-   printf ("EL BEBO\n");
-
    pthread_exit(0);
 }
 
