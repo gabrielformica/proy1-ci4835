@@ -111,19 +111,17 @@ int main(int argc, char *argv[]) {
       if (charsno < 0) {
          error("Error reading from sockets");
       } else if (charsno == 0) {
-         close(sockfd);
-         mfree(host);
-         mfree(comfile);
-         mfree(username);
          quit_request = true;
+         close(sockfd);
+         free(host);
+         free(comfile);
+         free(username);
          /* printf ("Esperando join...\n"); */
-         /* pthread_join(pthread_id, NULL); */
          /* printf ("Romp\n"); */
-
          exit(0);
       }
       
-      printf ("%s\n", buffer);
+      printf ("\n%s\n", buffer);
       pthread_mutex_unlock(&mutex);
    }
 	
@@ -169,7 +167,7 @@ void *reading_stdin(void *sockfd) {
          write(sock, line, MAX_PACK_SIZE);
          pthread_mutex_unlock(&mutex);
       }
-      mfree(line);
+      free(line);
       fclose(fp);
    }
       
@@ -190,8 +188,8 @@ void *reading_stdin(void *sockfd) {
   */
 
 void mfree(void * p) {
-   if (p)
-      free;
+   if (p != NULL)
+      free(p);
 }
 
 /**

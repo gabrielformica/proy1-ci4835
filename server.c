@@ -265,10 +265,22 @@ void sus(char *roomname, user_data *ud) {
 	}
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
+
+	char *buffer;
+	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
+		perror("Malloc failed");
+		write(get_socket(ud), "You are now subscribed to the room!", 256);
+		return;
+	}
+	strcat(buffer, "You are now subscribed to the room '");	
+	strcat(buffer, roomname);
+	strcat(buffer,"'!");
+	write(get_socket(ud), buffer, 256);
+	free(buffer);
 }
 
 /**
-  * Desubscribe an user from all of the chatrooms.
+  * Unsubscribe an user of all of the chatrooms.
   * @param ud: the data from the user that wants to desubscribe.
   * @param subs_rooms: list of rooms the user is subscribed to.
   * @return Anything.
@@ -281,6 +293,9 @@ void des(list subs_rooms, user_data *ud) {
       temp = temp->next;
    }
    destroy(subs_rooms);  //Delete all subscriptions
+	write(get_socket(ud), 
+			"You have been unsubscribed of all of the rooms.", 
+			256);
 }
 
 
@@ -509,5 +524,4 @@ void eli(char *roomname, int socket) {
 
 	//delete the room
 	del(rooms, temp_room->elem);
-	free(temp_room->elem);
 }
