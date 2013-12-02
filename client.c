@@ -31,20 +31,18 @@ char *username, *comfile;
 bool cfile = false;
 bool quit_request = false;
 
+void INThandler(int);
+
+
 int main(int argc, char *argv[]) {
-   signal(SIGINT,SIG_IGN);  //Ctrl-C is ignore
+
+   signal(SIGINT, INThandler);  //Ctrl-C is ignore
 
    int sockfd, portno, charsno;
    char opts, *host, buffer[MAX_PACK_SIZE];
    struct sockaddr_in serv_addr;	
    struct hostent *server;
 
-   printf ("%d\n", argc);
-   
-   if (argc > 4) {
-      printf ("Too many arguments\n");
-      exit(1);
-   }
    
    while ((opts = getopt(argc, argv, ":h:p:n:a:")) != -1) {
       switch (opts) {
@@ -184,4 +182,11 @@ void *reading_stdin(void *sockfd) {
 void mfree(void * p) {
    if (p)
       free;
+}
+
+void INThandler(int sig) {
+   signal(sig, SIG_IGN);
+   printf (" is not the correct way to quit.\n"
+           "Use \"fue\" insted\n\r");
+   return;
 }
