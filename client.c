@@ -20,6 +20,7 @@
 #include <netdb.h> 
 #include <pthread.h>
 #include <stdbool.h>
+#include <signal.h>
 
 void error();
 void mfree();
@@ -30,7 +31,7 @@ bool cfile = false;
 bool quit_request = false;
 
 int main(int argc, char *argv[]) {
-       
+   signal(SIGINT,SIG_IGN);  //Ctrl-C is ignore
 
    int sockfd, portno, charsno;
    char opts, *host, buffer[256];
