@@ -12,3 +12,4 @@ capture.lo
 *.txt
 html/*
 latex/*
+informe/

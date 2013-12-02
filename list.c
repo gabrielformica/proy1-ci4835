@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
-
+#include <string.h>
 
 /**
   * Create an empty list
@@ -45,6 +45,7 @@ box *add(list l, void *elem) {
 		perror("ERROR malloc");
 		return NULL;
 	}
+    memset(temp, 0, sizeof(box));
 	temp->elem = elem;
 	temp->next = NULL;
 	if (l->size == 0) {

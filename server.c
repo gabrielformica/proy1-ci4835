@@ -5,7 +5,7 @@
   *
   * @section Descripcion
   *
-  * Server code of the chat
+  * Main program of schat server
   */
 
 #include <netinet/tcp.h>
@@ -234,11 +234,25 @@ void error(const char *msg) {
    exit(1);
 }
 
+/**
+  * Subscribe a new user to a chatroom.
+  * @param ud: the data from the user that wants to subscribe to a chatroom.
+  * @param roomname: the name of the chatroom to which ud wants to subscribe.
+  * @return Anything.
+  */
+
 void sus(char *roomname, user_data *ud) {
    list subs_rooms = ud->subscribed_rooms;
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
 }
+
+/**
+  * Desubscribe an user from all of the chatrooms.
+  * @param ud: the data from the user that wants to desubscribe.
+  * @param subs_rooms: list of rooms the user is subscribed to.
+  * @return Anything.
+  */
 
 void des(list subs_rooms, user_data *ud) {
    box *temp = rooms->first;
@@ -248,6 +262,14 @@ void des(list subs_rooms, user_data *ud) {
    }
    destroy(subs_rooms);  //Delete all subscriptions
 }
+
+
+/**
+  * Waits for an user to send its username through a socket.
+  * @param rooms: list of chatrooms.
+  * @param socket: socket through which the username will be sent.
+  * @return A user_data structure containing the data from the new user.
+  */
 
 user_data *wait_username(list rooms, int socket) {
    user_data *ud = NULL;
@@ -276,6 +298,11 @@ user_data *wait_username(list rooms, int socket) {
    return ud;	
 }
 
+/**
+  * Lists all of the chatrooms on the server.
+  * @param socket: socket through which the list of chatrooms wil be sent.
+  * @return Anything.
+  */
 
 void sal(int socket) {
    write(socket, "---These are all the rooms---", 256);
@@ -298,6 +325,13 @@ void sal(int socket) {
 	}
 }
 
+/**
+  * Broadcasts a message to all users from a list.
+  * @param users: List of users to which the message will be broadcasted.
+  * @param msg: The message to be broadcasted.
+  * @return Anything.
+  */
+
 void broadcast_to_users(userslist users, char *msg) {
    box *temp = users->first;
    while (temp != NULL) {
@@ -306,6 +340,14 @@ void broadcast_to_users(userslist users, char *msg) {
       temp = temp->next;	
    }
 }
+
+/**
+  * Sends a message to all subscribed rooms.
+  * @param user: Data from the user sending the message.
+  * @param msg: The message to be sent.
+  * @param subs_rooms: List of rooms the user is subscribed to.
+  * @return Anything.
+  */
 
 void men(user_data *user, list subs_rooms, char *msg) {
    char *buffer;
@@ -331,6 +373,12 @@ void men(user_data *user, list subs_rooms, char *msg) {
    free(buffer);
 }
 
+/**
+  * Sends a list of all the users subscried to the server.
+  * @param socket: Socket through which the list of users will be sent.
+  * @return Anything.
+  */
+
 void usu(int socket) {
    write(socket, "---These are all the users on-line---", 256);
    box *temp = connected_users->first;	
@@ -351,6 +399,13 @@ void usu(int socket) {
 		free(buffer);
 	}
 }
+
+/**
+  * Creates a new chatroom.
+  * @param roomname: The name of the room that will be created.
+  * @param socket: Socket through which some information will be sent.
+  * @return Anything.
+  */
 
 void cre(int socket, char *roomname) {
 	char *name;
@@ -374,8 +429,15 @@ void cre(int socket, char *roomname) {
       write(socket, "Problem creating room", 256);
       return;
    }
-   
 }
+
+/**
+  * Ends the connection for an user.
+  * @param socket: Socket through which some information will be sent.
+  * @param subs_rooms: List of rooms the user is subscribed to.
+  * @param user: Data from the user ending the connection.
+  * @return Anything.
+  */
 
 void fue(list sub_rooms, user_data *ud) {
 	int socket = get_socket(ud);
@@ -387,6 +449,13 @@ void fue(list sub_rooms, user_data *ud) {
    close(socket);
    return;      
 }
+
+/**
+  * Deletes a chatroom from the server.
+  * @param roomname: The name of the room that will be deleted.
+  * @param socket: Socket through which some information will be sent.
+  * @return Anything.
+  */
 
 void eli(char *roomname, int socket) {
 	box *temp_room = get_room(rooms, roomname);
