@@ -38,20 +38,20 @@ void broadcast_to_users();
 void *connection_handler();
 user_data *wait_username();
 pthread_mutex_t mutex;
-char client_message[2000];
+/* char client_message[2000]; */
 list rooms;   
 list connected_users;
 
-typedef struct thread_data thread_data;
+typedef struct Thread_data Thread_data;
 
-struct thread_data {
+struct Thread_data {
    int client_sock;
    list subscribed_rooms; 
 };
-thread_data prepare_thread_data();
+
+Thread_data prepare_thread_data();
 
 int main(int argc, char *argv[]) {
-
    char opts;
    int sockfd, client_sock, portno;
    socklen_t clilen;
@@ -59,15 +59,13 @@ int main(int argc, char *argv[]) {
    char *defname = NULL;
    struct sockaddr_in serv_addr, cli_addr;
    int n;
-
    if (argc > 5) {
       printf ("Too many arguments\n");
       exit(1);
    }
 
-
    if (argc < 3) {    //port is needed 
-      fprintf(stderr,"Too few arguments.\n");
+      fprintf(stderr, "Too few arguments.\n");
       exit(1);
    } 
 
@@ -112,16 +110,16 @@ int main(int argc, char *argv[]) {
 
    /* Accept connections and create threads*/
 
-   listen(sockfd,3);
+   listen(sockfd, 3);
    clilen = sizeof(cli_addr);
    pthread_t thread_id;
-   pthread_mutex_init(&mutex,NULL);  
+   pthread_mutex_init(&mutex, NULL);  
    while (client_sock = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
       int flag = 1;
       int result = setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY, 
 														(char *) &flag, sizeof(int));
       printf("Connection accepted\n");
-      thread_data tdata = prepare_thread_data(client_sock, create_list());
+      Thread_data tdata = prepare_thread_data(client_sock, create_list());
 		
       if (pthread_create(&thread_id, NULL, connection_handler, 
                          (void *) &tdata)) {
@@ -136,8 +134,8 @@ int main(int argc, char *argv[]) {
   */
 
 void *connection_handler(void *td) {
-   int sock = ((thread_data *) td)->client_sock;
-   list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
+   int sock = ((Thread_data *) td)->client_sock;
+   list subscribed_rooms = ((Thread_data *) td)->subscribed_rooms;	
    char msg[MAX_PACK_SIZE];
    memset(msg, 0, MAX_PACK_SIZE);
 
@@ -207,7 +205,7 @@ void *connection_handler(void *td) {
 			strcat(msg, "des\n");
 			strcat(msg, "fue\n");
 			strcat(msg, "-----------");
-			write(sock,	msg, MAX_PACK_SIZE);
+			write(sock, msg, MAX_PACK_SIZE);
       }
 		else {
 			memset(msg, 0, MAX_PACK_SIZE);
@@ -228,8 +226,8 @@ void *connection_handler(void *td) {
   * @return An initialized thread data
   */
 
-thread_data prepare_thread_data(int client_sock, list l) {
-   thread_data temp; 
+Thread_data prepare_thread_data(int client_sock, list l) {
+   Thread_data temp; 
    temp.client_sock = client_sock;
    temp.subscribed_rooms = l;
    return temp;
@@ -290,7 +288,7 @@ user_data *wait_username(list rooms, int socket) {
    user_data *ud = NULL;
    if ((ud = malloc(sizeof(user_data))) == NULL) {
       perror("Error malloc");
-		write(socket,"",MAX_PACK_SIZE);   //end connection
+		write(socket, "", MAX_PACK_SIZE);   //end connection
    }
    char buffer[MAX_PACK_SIZE];
    bzero(buffer, MAX_PACK_SIZE);
@@ -301,7 +299,7 @@ user_data *wait_username(list rooms, int socket) {
       char *user_name;
       if ((user_name =  malloc(sizeof(char)*read_size)) == NULL) {
          perror("ERRRO malloc");
-			write(socket,"",MAX_PACK_SIZE);   //end connection
+			write(socket, "", MAX_PACK_SIZE);   //end connection
       }
       int i;
       for (i = 0; i < read_size; i++) 
@@ -331,7 +329,7 @@ void sal(int socket) {
 		while (temp != NULL) {
 			memset(buffer, 0, MAX_PACK_SIZE);
 			strcat(buffer, "* ");
-			strcat(buffer,((room *) temp->elem)->name);
+			strcat(buffer, ((room *) temp->elem)->name);
 			write(socket, buffer, MAX_PACK_SIZE);
 			temp = temp->next;
 		}
@@ -458,7 +456,7 @@ void fue(list sub_rooms, user_data *ud) {
 	int socket = get_socket(ud);
    box *temp = connected_users->first;
    des(sub_rooms, ud);
-   del(connected_users,ud);
+   del(connected_users, ud);
    free(ud);
    write(socket, "See you later", MAX_PACK_SIZE);
    close(socket);

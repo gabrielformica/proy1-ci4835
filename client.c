@@ -90,14 +90,14 @@ int main(int argc, char *argv[]) {
    serv_addr.sin_port = htons(portno);
 
 	//Connecting
-   if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
+   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
       error("Could not connect");
    }
 	printf("-------------------\n");
    printf("-You are connected-\n");
 	printf("-------------------\n");
 
-   pthread_mutex_init(&mutex,NULL); //Initialize mutex
+   pthread_mutex_init(&mutex, NULL); //Initialize mutex
 
    pthread_t pthread_id;
    if (pthread_create(&pthread_id, NULL, reading_stdin, (void *)&sockfd)) {
@@ -105,8 +105,8 @@ int main(int argc, char *argv[]) {
    }
 
    while(1) {
-      bzero(buffer,MAX_PACK_SIZE);
-      charsno = recv(sockfd, buffer, MAX_PACK_SIZE,0);
+      bzero(buffer, MAX_PACK_SIZE);
+      charsno = recv(sockfd, buffer, MAX_PACK_SIZE, 0);
       pthread_mutex_lock(&mutex);
       if (charsno < 0) {
          error("Error reading from sockets");
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
          exit(0);
       }
       
-      printf ("%s\n",buffer);
+      printf ("%s\n", buffer);
       pthread_mutex_unlock(&mutex);
    }
 	
