@@ -17,9 +17,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <ctype.h>
 #include "list.h"
 #include "roomslist.h"
 #define DEFAULT "actual"
+#define MAX_PORT_NUM 65535
 
 void error();
 void sal();
@@ -72,6 +74,10 @@ int main(int argc, char *argv[]) {
          break;
       case 'p':
          portno = atoi(optarg);
+         if (portno < 1 || portno > MAX_PORT_NUM) {
+            printf ("Port %d is an invalid port number\n", portno);
+            exit(1);
+         }
          break;
       case '?':
          printf("Urecognized option. Try again.\n");
