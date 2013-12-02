@@ -87,7 +87,6 @@ int main(int argc, char *argv[]) {
 
    rooms = initialize_rooms(defname);
    connected_users = create_list();
-   add_room(rooms,"A");
    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
       error("Open socket failed");
    bzero((char *) &serv_addr, sizeof(serv_addr));
