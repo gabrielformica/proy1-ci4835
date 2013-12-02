@@ -22,6 +22,7 @@
 #include "roomslist.h"
 #define DEFAULT "actual"
 #define MAX_PORT_NUM 65535
+#define MAX_PACK_SIZE 256
 
 void error();
 void sal();
@@ -54,14 +55,19 @@ int main(int argc, char *argv[]) {
    char opts;
    int sockfd, client_sock, portno;
    socklen_t clilen;
-   char buffer[256];
+   char buffer[MAX_PACK_SIZE];
    char *defname = NULL;
    struct sockaddr_in serv_addr, cli_addr;
    int n;
 
+   if (argc > 5) {
+      printf ("Too many arguments\n");
+      exit(1);
+   }
+
 
    if (argc < 3) {    //port is needed 
-      fprintf(stderr,"Wrong number of arguments.\n");
+      fprintf(stderr,"Too few arguments.\n");
       exit(1);
    } 
 
@@ -75,7 +81,7 @@ int main(int argc, char *argv[]) {
       case 'p':
          portno = atoi(optarg);
          if (portno < 1 || portno > MAX_PORT_NUM) {
-            printf ("Port %d is an invalid port number\n", portno);
+            printf ("Port entered is an invalid port number.\n");
             exit(1);
          }
          break;
@@ -132,15 +138,15 @@ int main(int argc, char *argv[]) {
 void *connection_handler(void *td) {
    int sock = ((thread_data *) td)->client_sock;
    list subscribed_rooms = ((thread_data *) td)->subscribed_rooms;	
-   char msg[256];
-   memset(msg, 0, 256);
+   char msg[MAX_PACK_SIZE];
+   memset(msg, 0, MAX_PACK_SIZE);
 
    user_data *user = wait_username(rooms, sock);  
    user->subscribed_rooms = subscribed_rooms;
    add(connected_users, user);
    add(subscribed_rooms, rooms->first);	
    int read_size;
-   while ((read_size = recv(sock, msg, 256, 0)) > 0) {
+   while ((read_size = recv(sock, msg, MAX_PACK_SIZE, 0)) > 0) {
       pthread_mutex_lock(&mutex);
       if (read_size < 3) {
       }
@@ -190,7 +196,7 @@ void *connection_handler(void *td) {
       }
       else if ((strlen(msg) == 4) &&
 					(msg[0] == 'h') && (msg[1] == 'l') && (msg[2] == 'p')) {
-			memset(msg, 0, 256);
+			memset(msg, 0, MAX_PACK_SIZE);
 			strcat(msg, "-----------\n");
 			strcat(msg, "The valids commands formats are:\n");
 			strcat(msg, "sus <room name>\n");
@@ -201,15 +207,15 @@ void *connection_handler(void *td) {
 			strcat(msg, "des\n");
 			strcat(msg, "fue\n");
 			strcat(msg, "-----------");
-			write(sock,	msg, 256);
+			write(sock,	msg, MAX_PACK_SIZE);
       }
 		else {
-			memset(msg, 0, 256);
+			memset(msg, 0, MAX_PACK_SIZE);
 			strcat(msg, "Unrecognized option.");
 			strcat(msg, " Try `hlp' for more information.");
-			write(sock,	msg, 256);
+			write(sock,	msg, MAX_PACK_SIZE);
 		}
-      memset(msg, 0, 256);
+      memset(msg, 0, MAX_PACK_SIZE);
       pthread_mutex_unlock(&mutex);
    }
 }
@@ -249,7 +255,7 @@ void error(const char *msg) {
 void sus(char *roomname, user_data *ud) {
    list subs_rooms = ud->subscribed_rooms;
    if (get_room(rooms, roomname) == NULL) {
-      write(get_socket(ud), "Sorry, this room does not exist", 256);
+      write(get_socket(ud), "Sorry, this room does not exist", MAX_PACK_SIZE);
       return;
    }
    add_user(rooms, roomname, ud);
@@ -284,18 +290,18 @@ user_data *wait_username(list rooms, int socket) {
    user_data *ud = NULL;
    if ((ud = malloc(sizeof(user_data))) == NULL) {
       perror("Error malloc");
-		write(socket,"",256);   //end connection
+		write(socket,"",MAX_PACK_SIZE);   //end connection
    }
-   char buffer[256];
-   bzero(buffer, 256);
+   char buffer[MAX_PACK_SIZE];
+   bzero(buffer, MAX_PACK_SIZE);
    int read_size;
    box *user = NULL;
-   if ((read_size = recv(socket, buffer, 256, 0)) > 0) {
+   if ((read_size = recv(socket, buffer, MAX_PACK_SIZE, 0)) > 0) {
       pthread_mutex_lock(&mutex);
       char *user_name;
       if ((user_name =  malloc(sizeof(char)*read_size)) == NULL) {
          perror("ERRRO malloc");
-			write(socket,"",256);   //end connection
+			write(socket,"",MAX_PACK_SIZE);   //end connection
       }
       int i;
       for (i = 0; i < read_size; i++) 
@@ -314,22 +320,22 @@ user_data *wait_username(list rooms, int socket) {
   */
 
 void sal(int socket) {
-   write(socket, "---These are all the rooms---", 256);
+   write(socket, "---These are all the rooms---", MAX_PACK_SIZE);
    box *temp = rooms->first;
 	char *buffer;
-	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
+	if ((buffer = malloc(sizeof(char)*MAX_PACK_SIZE)) == NULL) {
 		perror("Malloc failed");
-		write(socket, "Sorry, problems with server. Try again", 256);
+		write(socket, "Sorry, problems with server. Try again", MAX_PACK_SIZE);
 	} 
 	else {
 		while (temp != NULL) {
-			memset(buffer, 0, 256);
+			memset(buffer, 0, MAX_PACK_SIZE);
 			strcat(buffer, "* ");
 			strcat(buffer,((room *) temp->elem)->name);
-			write(socket, buffer, 256);
+			write(socket, buffer, MAX_PACK_SIZE);
 			temp = temp->next;
 		}
-		write(socket, "-----------------------------", 256);
+		write(socket, "-----------------------------", MAX_PACK_SIZE);
 		free(buffer);
 	}
 }
@@ -345,7 +351,7 @@ void broadcast_to_users(userslist users, char *msg) {
    box *temp = users->first;
    while (temp != NULL) {
       user_data *ud = (user_data *) temp->elem;
-      write(ud->socket, msg, 256); 
+      write(ud->socket, msg, MAX_PACK_SIZE); 
       temp = temp->next;	
    }
 }
@@ -360,16 +366,16 @@ void broadcast_to_users(userslist users, char *msg) {
 
 void men(user_data *user, list subs_rooms, char *msg) {
    char *buffer;
-	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
+	if ((buffer = malloc(sizeof(char)*MAX_PACK_SIZE)) == NULL) {
 		perror("Malloc failed");
 		write(get_socket(user),
 				"Server: there was an error. Please, resend your message.",
-				256);
+				MAX_PACK_SIZE);
 		return;
 	}
    box *temp = subs_rooms->first;	
    while (temp != NULL) {
-      memset(buffer, 0, 256);
+      memset(buffer, 0, MAX_PACK_SIZE);
       int i;
       strcpy(buffer, user->name);
       strcat(buffer, " (from room \'");	
@@ -389,22 +395,22 @@ void men(user_data *user, list subs_rooms, char *msg) {
   */
 
 void usu(int socket) {
-   write(socket, "---These are all the users on-line---", 256);
+   write(socket, "---These are all the users on-line---", MAX_PACK_SIZE);
    box *temp = connected_users->first;	
 	char *buffer;
-	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
+	if ((buffer = malloc(sizeof(char)*MAX_PACK_SIZE)) == NULL) {
 		perror("Malloc failed");
-		write(socket, "Sorry, problems with server. Try again", 256);
+		write(socket, "Sorry, problems with server. Try again", MAX_PACK_SIZE);
 	} 
 	else {
 		while (temp != NULL) {
-			memset(buffer, 0, 256);
+			memset(buffer, 0, MAX_PACK_SIZE);
 			strcat(buffer, "* ");
 			strcat(buffer, get_name((user_data *) temp->elem)); 
-			write(socket, buffer, 256);
+			write(socket, buffer, MAX_PACK_SIZE);
 			temp = temp->next;
 		}
-		write(socket, "-----------------------------", 256);
+		write(socket, "-----------------------------", MAX_PACK_SIZE);
 		free(buffer);
 	}
 }
@@ -422,20 +428,20 @@ void cre(int socket, char *roomname) {
 		perror("Malloc failed");
 		write(socket,
 				"Server: there was an error. Please, resend your message.",
-				256);
+				MAX_PACK_SIZE);
 		return;
 	}
 	strcpy(name, roomname);
    box *temp;
 
    if ((temp  = get_room(rooms, name)) != NULL) {
-      write(socket, "Room already exists", 256);
+      write(socket, "Room already exists", MAX_PACK_SIZE);
       return;
    }
    temp = NULL;
 
    if ((temp = add_room(rooms, name)) == NULL) {
-      write(socket, "Problem creating room", 256);
+      write(socket, "Problem creating room", MAX_PACK_SIZE);
       return;
    }
 }
@@ -454,7 +460,7 @@ void fue(list sub_rooms, user_data *ud) {
    des(sub_rooms, ud);
    del(connected_users,ud);
    free(ud);
-   write(socket, "See you later", 256);
+   write(socket, "See you later", MAX_PACK_SIZE);
    close(socket);
    return;      
 }
@@ -469,11 +475,11 @@ void fue(list sub_rooms, user_data *ud) {
 void eli(char *roomname, int socket) {
 	box *temp_room = get_room(rooms, roomname);
 	if (temp_room == NULL) {
-		write(socket, "You can't delete a room that doesn't exist", 256);
+		write(socket, "You can't delete a room that doesn't exist", MAX_PACK_SIZE);
 		return;
 	}
 	if (temp_room == rooms->first) {
-		write(socket, "You just can't delete the default room", 256);
+		write(socket, "You just can't delete the default room", MAX_PACK_SIZE);
 		return;
 	}
 

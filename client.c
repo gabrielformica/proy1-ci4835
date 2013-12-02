@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <signal.h>
+#define MAX_PACK_SIZE 256
 
 void error();
 void mfree();
@@ -34,10 +35,17 @@ int main(int argc, char *argv[]) {
    signal(SIGINT,SIG_IGN);  //Ctrl-C is ignore
 
    int sockfd, portno, charsno;
-   char opts, *host, buffer[256];
+   char opts, *host, buffer[MAX_PACK_SIZE];
    struct sockaddr_in serv_addr;	
    struct hostent *server;
-        
+
+   printf ("%d\n", argc);
+   
+   if (argc > 4) {
+      printf ("Too many arguments\n");
+      exit(1);
+   }
+   
    while ((opts = getopt(argc, argv, ":h:p:n:a:")) != -1) {
       switch (opts) {
          int size;
@@ -100,8 +108,8 @@ int main(int argc, char *argv[]) {
    }
 
    while(1) {
-      bzero(buffer,256);
-      charsno = recv(sockfd, buffer, 256,0);
+      bzero(buffer,MAX_PACK_SIZE);
+      charsno = recv(sockfd, buffer, MAX_PACK_SIZE,0);
       pthread_mutex_lock(&mutex);
       if (charsno < 0) {
          error("Error reading from sockets");
@@ -140,13 +148,13 @@ void error(char *msg) {
 
 void *reading_stdin(void *sockfd) {
    int sock = *(int *) sockfd;
-   char message[256];
+   char message[MAX_PACK_SIZE];
    FILE * fp;
    char * line;
    size_t len = 0;
    ssize_t read;
 
-   bzero(message, 256);
+   bzero(message, MAX_PACK_SIZE);
    write(sock, username, strlen(username));
    if (cfile) {
       fp = fopen(comfile, "r");
@@ -156,7 +164,7 @@ void *reading_stdin(void *sockfd) {
       
       while ((read = getline(&line, &len, fp)) != -1) {
          pthread_mutex_lock(&mutex);
-         write(sock, line, 256);
+         write(sock, line, MAX_PACK_SIZE);
          pthread_mutex_unlock(&mutex);
       }
       mfree(line);
@@ -164,10 +172,10 @@ void *reading_stdin(void *sockfd) {
    }
       
    while(!quit_request) {
-      fgets(message, 256, stdin);
+      fgets(message, MAX_PACK_SIZE, stdin);
       pthread_mutex_lock(&mutex);
-      write(sock, message, 256);
-      bzero(message, 256);
+      write(sock, message, MAX_PACK_SIZE);
+      bzero(message, MAX_PACK_SIZE);
       pthread_mutex_unlock(&mutex);
    }
    pthread_exit(0);
