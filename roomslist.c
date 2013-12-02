@@ -150,7 +150,7 @@ bool del_user(list l, char *roomname, void *user) {
 /**
   * Get the list subscribed_rooms of user_data *
   * @param ud: pointer to user_data
-  * @return the list of subscribed_rooms
+  * @return The list of subscribed_rooms
   */
 
 list get_subscribed_rooms(user_data * ud) {
@@ -160,9 +160,29 @@ list get_subscribed_rooms(user_data * ud) {
 /**
   * Get the users of a room
   * @param r: pointer to the room
-  * return: The users added to that room
+  * @return The users added to that room
   */
 
 list get_userslist(room *r) {
 	return r->users;
+}
+
+/**
+  * Get the socket number of an user 
+  * @param ud: pointer to the user_data structure 
+  * @return The socket number of the user
+  */
+
+int get_socket(user_data *ud) {
+	return ud->socket;
+}
+
+/**
+  * Get the name of an user 
+  * @param ud: pointer to the user_data structure 
+  * @return The socket number of the user
+  */
+
+char *get_name(user_data *ud) {
+	return ud->name;
 }

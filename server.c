@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
 
    if (argc < 3) {    //port is needed 
-      fprintf(stderr,"ERROR, wrong number of arguments.\n");
+      fprintf(stderr,"Wrong number of arguments.\n");
       exit(1);
    } 
 
@@ -74,8 +74,8 @@ int main(int argc, char *argv[]) {
          portno = atoi(optarg);
          break;
       case '?':
-         printf("ERROR with flags\n");
-         break;
+         printf("Urecognized option. Try again\n");
+			exit(1);
       }
    }
 
@@ -125,12 +125,10 @@ void *connection_handler(void *td) {
    char msg[256];
    memset(msg, 0, 256);
 
-   user_data *user = wait_username(rooms, sock);  //user points to the box of the user
+   user_data *user = wait_username(rooms, sock);  
    user->subscribed_rooms = subscribed_rooms;
    add(connected_users, user);
-   printf("este es el nombre de usuario: -%s-\n", ((char *) user->name));
    add(subscribed_rooms, rooms->first);	
-   printf("primera sala: -%s-\n", ((room *) ((box *)subscribed_rooms->first->elem)->elem)->name);
    int read_size;
    while ((read_size = recv(sock, msg, 256, 0)) > 0) {
       pthread_mutex_lock(&mutex);
@@ -166,7 +164,7 @@ void *connection_handler(void *td) {
          eli(msg, sock, user);
       }
       else if ((msg[0] == 'f') && (msg[1] == 'u') && (msg[2] == 'e')) {
-         fue(sock, subscribed_rooms, user);
+         fue(subscribed_rooms, user);
       }
       else if ((msg[0] == 'h') && (msg[1] == 'l') && (msg[2] == 'p')) {
 			memset(msg, 0, 256);
@@ -184,8 +182,8 @@ void *connection_handler(void *td) {
       }
 		else {
 			memset(msg, 0, 256);
-			strcat(msg, "Debes escribir un comando valido.");
-			strcat(msg, " Haz hlp para ver una ayuda de comandos");
+			strcat(msg, "Unrecognized option.");
+			strcat(msg, " Try `hlp' for more information.");
 			write(sock,	msg, 256);
 		}
       memset(msg, 0, 256);
@@ -207,17 +205,8 @@ void error(const char *msg) {
 
 void sus(char *roomname, user_data *ud) {
    list subs_rooms = ud->subscribed_rooms;
-	printf("Se va a suscribir al usuario %s a la sala %s\n",ud->name,roomname);
    add_user(rooms, roomname, ud);
    add(subs_rooms, get_room(rooms, roomname));
-   box *tmp;
-   tmp = subs_rooms->first;
-   printf ("Usuario %s está suscrito a:\n", ud->name);
-   while (tmp != NULL) {
-      box *temp_room = tmp->elem;
-      printf ("*%s\n", ((room *) temp_room->elem)->name);
-      tmp = tmp->next;
-   }
 }
 
 void des(list subs_rooms, user_data *ud) {
@@ -226,13 +215,14 @@ void des(list subs_rooms, user_data *ud) {
       del_user(rooms, ((room *) temp->elem)->name, ud);
       temp = temp->next;
    }
-   destroy(subs_rooms);
+   destroy(subs_rooms);  //Delete all subscriptions
 }
 
 user_data *wait_username(list rooms, int socket) {
    user_data *ud = NULL;
    if ((ud = malloc(sizeof(user_data))) == NULL) {
       perror("Error malloc");
+		write(socket,"",256);   //end connection
    }
    char buffer[256];
    bzero(buffer, 256);
@@ -243,6 +233,7 @@ user_data *wait_username(list rooms, int socket) {
       char *user_name;
       if ((user_name =  malloc(sizeof(char)*read_size)) == NULL) {
          perror("ERRRO malloc");
+			write(socket,"",256);   //end connection
       }
       int i;
       for (i = 0; i < read_size; i++) 
@@ -272,8 +263,8 @@ void sal(int socket) {
 			temp = temp->next;
 		}
 		write(socket, "-----------------------------", 256);
+		free(buffer);
 	}
-	free(buffer);
 }
 
 void broadcast_to_users(userslist users, char *msg) {
@@ -288,12 +279,14 @@ void broadcast_to_users(userslist users, char *msg) {
 void men(user_data *user, list subs_rooms, char *msg) {
    char *buffer;
 	if ((buffer = malloc(sizeof(char)*256)) == NULL) {
-		perror("ERROR malloc");
+		perror("Malloc failed");
+		write(get_socket(user),
+				"Server: there was an error. Please, resend your message.",
+				256);
+		return;
 	}
-	
    box *temp = subs_rooms->first;	
    while (temp != NULL) {
-		printf("La sala a la que se hara broadcast sera %s\n", ((room *) ((box *) temp->elem)->elem)->name);
       memset(buffer, 0, 256);
       int i;
       strcpy(buffer, user->name);
@@ -301,8 +294,6 @@ void men(user_data *user, list subs_rooms, char *msg) {
       strcat(buffer, ((room *) ((box *) temp->elem)->elem)->name);
       strcat(buffer, "\') says: ");
       strcat(buffer, msg);
-		
-		printf("A esto le voy a hacer broadcast %s\n",msg);
       broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, buffer);
       temp = temp->next;
    }
@@ -320,10 +311,13 @@ void usu(int socket) {
 void cre(int socket, char *roomname) {
 	char *name;
 	if ((name = malloc(sizeof(char)*strlen(roomname))) == NULL) {
-		perror("ERROR malloc");
+		perror("Malloc failed");
+		write(socket,
+				"Server: there was an error. Please, resend your message.",
+				256);
+		return;
 	}
 	strcpy(name, roomname);
-	printf("Se va a crear la sala de nombre: -%s-\n", roomname);
    box *temp;
 
    if ((temp  = get_room(rooms, name)) != NULL) {
@@ -339,7 +333,8 @@ void cre(int socket, char *roomname) {
    
 }
 
-void fue(int socket, list sub_rooms, user_data *ud) {
+void fue(list sub_rooms, user_data *ud) {
+	int socket = get_socket(ud);
    box *temp = connected_users->first;
    des(sub_rooms, ud);
    del(connected_users,ud);
@@ -350,7 +345,6 @@ void fue(int socket, list sub_rooms, user_data *ud) {
 }
 
 void eli(char *roomname, int socket) {
-	printf("Se intentara borrar -%s-\n",roomname);
 	box *temp_room = get_room(rooms, roomname);
 	if (temp_room == NULL) {
 		write(socket, "You can't delete a room that doesn't exist", 256);
@@ -364,8 +358,7 @@ void eli(char *roomname, int socket) {
 	box *temp_cu = connected_users->first;
 	//delete subscriptions to the rooms of every user
 	while (temp_cu != NULL) { 
-		if (del(get_subscribed_rooms(temp_cu->elem), temp_room))
-			printf("Al usuario %s se le acaba de borrar %s\n",((user_data *) temp_cu->elem)->name,((room *) temp_room->elem)->name);
+		del(get_subscribed_rooms(temp_cu->elem), temp_room);
 		temp_cu = temp_cu->next;
 	}
 
