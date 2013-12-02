@@ -1,3 +1,13 @@
+/**
+  * @file
+  * @author Gabriel Formica <gabriel@ac.labf.usb.ve>
+  * @author Melecio Ponte <melecio@ac.labf.usb.ve> 
+  *
+  * @section Descripcion
+  *
+  * List of rooms that implements generic lists
+  */
+
 #include "list.h"
 
 #ifndef ROOMSLIST_H
@@ -20,7 +30,7 @@ struct user_data {
 
 
 /**
-  * Initliaze the list of rooms
+  * Initialize the list of rooms
   * @param defname: the name of the first room (default room)
   * @return A valid list of rooms 
   */
@@ -86,19 +96,36 @@ extern box *get_room(list,char *);
 extern bool del_user(list, char*, void *);
 
 /**
+  * Get the users of a room
+  * @param r: pointer to the room
+  * @return The users added to that room
+  */
+
+extern list get_userslist(room *r);
+
+/**
+  * Get the socket number of an user 
+  * @param ud: pointer to the user_data structure 
+  * @return The socket number of the user
+  */
+
+extern int get_socket(user_data *);
+
+/**
   * Get the list subscribed_rooms of user_data *
   * @param ud: pointer to user_data
-  * @return the list of subscribed_rooms
+  * @return The list of subscribed_rooms
   */
 
 extern list get_subscribed_rooms(user_data *); 
 
+
 /**
-  * Get the users of a room
-  * @param r: pointer to the room
-  * return: The users added to that room
+  * Get the name of an user 
+  * @param ud: pointer to the user_data structure 
+  * @return The socket number of the user
   */
 
-extern list get_userslist(room *r);
+extern char *get_name(user_data *);
 
 #endif
