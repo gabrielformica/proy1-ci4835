@@ -23,16 +23,15 @@
 #include <signal.h>
 #define MAX_PACK_SIZE 256
 
-void error();
-void mfree();
-void *reading_stdin();
 pthread_mutex_t mutex;
 char *username, *comfile;
 bool cfile = false;
 bool quit_request = false;
 
 void INThandler(int);
-
+void error();
+void mfree();
+void *reading_stdin();
 
 int main(int argc, char *argv[]) {
 
@@ -143,6 +142,11 @@ void error(char *msg) {
 	exit(1);
 }
 
+/**
+  * Reads from standard input.
+  * @param sockfd: Socket to which the input will be written.
+  * @return Nothing.
+  */
 
 void *reading_stdin(void *sockfd) {
    int sock = *(int *) sockfd;
@@ -179,10 +183,22 @@ void *reading_stdin(void *sockfd) {
    pthread_exit(0);
 }
 
+/**
+  * Frees space from heap only if assigned.
+  * @param p: Pointer to an objetc in memory.
+  * @return Nothing.
+  */
+
 void mfree(void * p) {
    if (p)
       free;
 }
+
+/**
+  * Handles the Ctrl-C signal.
+  * @param sig: Integer with signal number.
+  * @return Nothing.
+  */
 
 void INThandler(int sig) {
    signal(sig, SIG_IGN);
