@@ -46,6 +46,16 @@ extern list create_list();
 extern box *add(list,void *);
 
 /**
+  * Look if an element is in a list
+  * @param elem: the element it is desired to find
+  * @param l: The list. It is a valid list
+  * @return True if the element is in list. False in any other case
+  */
+
+
+extern bool is_in(void * elem, list l);
+
+/**
   * Get the amount of elements in the list
   * @param The list. It is a valid list
   * @return The amount of elements in the list
@@ -67,7 +77,7 @@ extern bool del(list,void *);
   * @return Anything, but the list is initialized
   */
 
-
 extern void destroy(list);
+
 
 #endif

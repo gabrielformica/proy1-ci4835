@@ -252,7 +252,9 @@ void error(const char *msg) {
 void sus(char *roomname, user_data *ud) {
    list subs_rooms = ud->subscribed_rooms;
    if (get_room(rooms, roomname) == NULL) {
-      write(get_socket(ud), "Sorry, this room does not exist", MAX_PACK_SIZE);
+      write(get_socket(ud), 
+				"Sorry, this room does not exist", 
+				MAX_PACK_SIZE);
       return;
    }
 	if (is_in(get_room(rooms, roomname), subs_rooms)) {
@@ -292,8 +294,10 @@ void des(list subs_rooms, user_data *ud) {
 user_data *wait_username(list rooms, int socket) {
    user_data *ud = NULL;
    if ((ud = malloc(sizeof(user_data))) == NULL) {
-      perror("Error malloc");
-		write(socket, "", MAX_PACK_SIZE);   //end connection
+      perror("Malloc failed");
+		write(socket, "server: There was an error in the server.", MAX_PACK_SIZE);
+		close(socket); //end of connection
+		return NULL;
    }
    char buffer[MAX_PACK_SIZE];
    bzero(buffer, MAX_PACK_SIZE);
@@ -303,8 +307,10 @@ user_data *wait_username(list rooms, int socket) {
       pthread_mutex_lock(&mutex);
       char *user_name;
       if ((user_name =  malloc(sizeof(char)*read_size)) == NULL) {
-         perror("ERRRO malloc");
-			write(socket, "", MAX_PACK_SIZE);   //end connection
+         perror("Malloc failed");
+			write(socket, "server: There was an error in the server.", MAX_PACK_SIZE);
+			close(socket); //end of connection
+			return NULL;
       }
       int i;
       for (i = 0; i < read_size; i++) 
@@ -328,7 +334,9 @@ void sal(int socket) {
 	char *buffer;
 	if ((buffer = malloc(sizeof(char)*MAX_PACK_SIZE)) == NULL) {
 		perror("Malloc failed");
-		write(socket, "Sorry, problems with server. Try again", MAX_PACK_SIZE);
+		write(socket, 
+				"server: Sorry, problems with server. Try again.", 
+				MAX_PACK_SIZE);
 	} 
 	else {
 		while (temp != NULL) {
@@ -398,12 +406,14 @@ void men(user_data *user, list subs_rooms, char *msg) {
   */
 
 void usu(int socket) {
-   write(socket, "---These are all the users on-line---", MAX_PACK_SIZE);
+   write(socket, "---These are all the users connected---", MAX_PACK_SIZE);
    box *temp = connected_users->first;	
 	char *buffer;
 	if ((buffer = malloc(sizeof(char)*MAX_PACK_SIZE)) == NULL) {
 		perror("Malloc failed");
-		write(socket, "Sorry, problems with server. Try again", MAX_PACK_SIZE);
+		write(socket, 
+				"server: Sorry, problems with server. Try again.", 
+				MAX_PACK_SIZE);
 	} 
 	else {
 		while (temp != NULL) {
