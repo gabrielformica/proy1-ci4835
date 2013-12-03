@@ -30,7 +30,6 @@ bool quit_request = false;
 
 void INThandler(int);
 void error();
-void mfree();
 void *reading_stdin();
 
 int main(int argc, char *argv[]) {
@@ -75,7 +74,6 @@ int main(int argc, char *argv[]) {
 			exit(1);
       }
    }
-
    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
       error("Could not open socket");
 
@@ -110,33 +108,21 @@ int main(int argc, char *argv[]) {
       pthread_mutex_lock(&mutex);
       if (charsno < 0) {
          error("Error reading from sockets");
-      } else if (charsno == 0) {
-			
-         quit_request = true;
-         close(sockfd);
-        // free(host);
-         free(comfile);
-         free(username);
-			/*
-			*/
-         /* printf ("Esperando join...\n"); */
-         /* printf ("Romp\n"); */
-         exit(0);
+      } 
+		else if (charsno == 0) {
+			break;	
       }
-      
       printf ("\n%s\n", buffer);
       pthread_mutex_unlock(&mutex);
    }
-	
 
-   /*
-     close(sockfd);
-     free(host);
-     free(comfile); 
-     free(username);
-   */
-   free(username);
+	close(sockfd);
 }
+
+/**
+  * Send an error message and terminate the program
+  * @param msg: msg to be sended
+  */
 
 void error(char *msg) {
 	perror(msg);
@@ -152,8 +138,8 @@ void error(char *msg) {
 void *reading_stdin(void *sockfd) {
    int sock = *(int *) sockfd;
    char message[MAX_PACK_SIZE];
-   FILE * fp;
-   char * line;
+   FILE *fp;
+   char *line;
    size_t len = 0;
    ssize_t read;
 
@@ -184,16 +170,6 @@ void *reading_stdin(void *sockfd) {
    pthread_exit(0);
 }
 
-/**
-  * Frees space from heap only if assigned.
-  * @param p: Pointer to an objetc in memory.
-  * @return Nothing.
-  */
-
-void mfree(void * p) {
-   if (p != NULL)
-      free(p);
-}
 
 /**
   * Handles the Ctrl-C signal.
