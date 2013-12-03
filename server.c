@@ -341,6 +341,7 @@ user_data *wait_username(list rooms, int socket) {
 			close(socket); //end of connection
 			return NULL;
       }
+		memset(user_name, 0, read_size);
       int i;
       for (i = 0; i < read_size; i++) 
          user_name[i] = buffer[i];
@@ -405,6 +406,12 @@ void broadcast_to_users(userslist users, char *msg) {
   */
 
 void men(user_data *user, list subs_rooms, char *msg) {
+	if (get_size(subs_rooms) == 0) {
+		write(get_socket(user), 
+				"You have to be subscribed to at least one room.",
+				256);
+		return;
+	}
    char *buffer;
 	if ((buffer = malloc(sizeof(char)*MAX_PACK_SIZE)) == NULL) {
 		perror("Malloc failed");
@@ -474,6 +481,7 @@ void cre(int socket, char *roomname) {
 				MAX_PACK_SIZE);
 		return;
 	}
+	memset(name, 0, strlen(name));
 	strcpy(name, roomname);
    box *temp;
 
