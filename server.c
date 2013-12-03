@@ -305,12 +305,7 @@ void unsubscribe_all(list subs_rooms, user_data *ud) {
   */
 
 void des(list subs_rooms, user_data *ud) {
-	box *temp = rooms->first;
-   while (temp != NULL) {	
-      del_user(rooms, ((room *) temp->elem)->name, ud);
-      temp = temp->next;
-   }
-   destroy(subs_rooms);  //Delete all subscriptions
+	unsubscribe_all(subs_rooms, ud);
 	write(get_socket(ud), 
 			"You have been unsubscribed of all of the rooms.", 
 			256);
