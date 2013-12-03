@@ -2,6 +2,8 @@
 *.out
 client
 server
+schat
+cchat
 \#*
 *.cache
 .*
