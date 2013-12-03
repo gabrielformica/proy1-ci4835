@@ -273,6 +273,7 @@ void sus(char *roomname, user_data *ud) {
 		write(get_socket(ud), "You are now subscribed to the room!", 256);
 		return;
 	}
+	memset(buffer, 0, 256);
 	strcat(buffer, "You are now subscribed to the room '");	
 	strcat(buffer, roomname);
 	strcat(buffer,"'!");
@@ -424,6 +425,7 @@ void men(user_data *user, list subs_rooms, char *msg) {
       broadcast_to_users(((room *) ((box *) temp->elem)->elem)->users, buffer);
       temp = temp->next;
    }
+   memset(buffer, 0, MAX_PACK_SIZE);
    free(buffer);
 }
 
