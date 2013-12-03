@@ -179,6 +179,5 @@ void *reading_stdin(void *sockfd) {
 
 void INThandler(int sig) {
    printf (" is not the correct way to quit.\n"
-           "Use \"fue\" instead\n\r");
-   return;
+           "Use \"fue\" instead\n");
 }
