@@ -8,7 +8,6 @@
   * Client code of the chat
   */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,7 +33,7 @@ void *reading_stdin();
 
 int main(int argc, char *argv[]) {
 
-   signal(SIGINT, INThandler);  //Ctrl-C is ignore
+   signal(SIGINT, INThandler);  //Ctrl-C does not kill the process
 
    int sockfd, portno, charsno;
    char opts, *host, buffer[MAX_PACK_SIZE];
