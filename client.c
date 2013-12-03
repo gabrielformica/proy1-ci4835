@@ -111,11 +111,14 @@ int main(int argc, char *argv[]) {
       if (charsno < 0) {
          error("Error reading from sockets");
       } else if (charsno == 0) {
+			
          quit_request = true;
          close(sockfd);
-         free(host);
+        // free(host);
          free(comfile);
          free(username);
+			/*
+			*/
          /* printf ("Esperando join...\n"); */
          /* printf ("Romp\n"); */
          exit(0);

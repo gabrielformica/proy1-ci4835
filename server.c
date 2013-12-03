@@ -30,6 +30,7 @@ void usu();
 void cre();
 void subscribe();
 void men();
+void unsubscribe_all();
 void des();
 void sus();
 void fue();
@@ -280,19 +281,31 @@ void sus(char *roomname, user_data *ud) {
 }
 
 /**
-  * Unsubscribe an user of all of the chatrooms.
+  * Unsubscribe an user of all of the chatrooms. Auxiliar function for des
   * @param ud: the data from the user that wants to desubscribe.
   * @param subs_rooms: list of rooms the user is subscribed to.
   * @return Anything.
   */
 
-void des(list subs_rooms, user_data *ud) {
+
+void unsubscribe_all(list subs_rooms, user_data *ud) {
    box *temp = rooms->first;
    while (temp != NULL) {	
       del_user(rooms, ((room *) temp->elem)->name, ud);
       temp = temp->next;
    }
    destroy(subs_rooms);  //Delete all subscriptions
+}
+
+/**
+  * Unsubscribe an user of all of the chatrooms and send a message to the user.
+  * @param ud: the data from the user that wants to desubscribe.
+  * @param subs_rooms: list of rooms the user is subscribed to.
+  * @return Anything.
+  */
+
+void des(list subs_rooms, user_data *ud) {
+	unsubscribe_all(subs_rooms, ud);
 	write(get_socket(ud), 
 			"You have been unsubscribed of all of the rooms.", 
 			256);
@@ -485,7 +498,7 @@ void cre(int socket, char *roomname) {
 void fue(list sub_rooms, user_data *ud) {
 	int socket = get_socket(ud);
    box *temp = connected_users->first;
-   des(sub_rooms, ud);
+   unsubscribe_all(sub_rooms, ud);
    del(connected_users, ud);
    free(ud);
    write(socket, "See you later", MAX_PACK_SIZE);
