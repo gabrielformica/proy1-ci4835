@@ -3,13 +3,13 @@ CC= gcc -g -lpthread
 LIBO= list.o roomslist.o
 LIBH= list.h roomslist.h
 
-all: server client 
-server: server.o ${LIBO}
-	${CC}  server.o ${LIBO} -o server 
+all: schat cchat 
+schat: server.o ${LIBO}
+	${CC}  server.o ${LIBO} -o schat 
 server.o: server.c ${LIBH}
 	${CC}  -c server.c
-client: client.o ${LIBO}
-	${CC} client.o ${LIBO} -o client
+cchat: client.o ${LIBO}
+	${CC} client.o ${LIBO} -o cchat
 client.o: client.c ${LIBH} 
 	${CC} -c client.c
 list.o: list.c list.h 
@@ -17,4 +17,4 @@ list.o: list.c list.h
 roomslist.o: roomslist.c roomslist.h list.h
 	${CC} -c roomslist.c
 clean:
-	rm -f *.o server client
+	rm -f *.o schat cchat
